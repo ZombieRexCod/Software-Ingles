@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salones - Panel Admin - Instituto American Land</title>
+  <link rel="stylesheet" href="../assets/css/inicio_admin.css" />
+  <link rel="stylesheet" href="../assets/css/salones_admin.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
+      <div class="nav-perfil">
+        <div class="nav-avatar" id="nav-avatar">A</div>
+        <div class="nav-info">
+          <span class="nav-nombre" id="nav-nombre">Administrador</span>
+          <span class="nav-rol">Admin</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="inicio.html">Inicio</a></li>
+        <li><a href="docentes.html">Docentes</a></li>
+        <li><a href="alumnos.html">Alumnos</a></li>
+        <li><a href="salones.html" class="activo">Salones</a></li>
+        <li><a href="matriculas.html">Matrículas</a></li>
+      </ul>
+
+      <div class="nav-acciones">
+        <button class="btn-nav-icon" title="Notificaciones" id="btn-notif">&#128276;</button>
+        <a href="../auth/login.html" class="btn-nav-icon btn-cerrar" title="Cerrar sesión">&#8594;&#124;</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <section class="sidebar-seccion">
+        <h3>Panel Admin</h3>
+        <ul>
+          <li class="menu-item">
+            <span class="menu-icono">&#127968;</span>
+            <a href="inicio.html">Inicio</a>
+          </li>
+          <li class="menu-item">
+            <span class="menu-icono">&#128104;&#8205;&#127979;</span>
+            <a href="docentes.html">Docentes</a>
+          </li>
+          <li class="menu-item">
+            <span class="menu-icono">&#127891;</span>
+            <a href="alumnos.html">Alumnos</a>
+          </li>
+          <li class="menu-item activo">
+            <span class="menu-icono">&#128198;</span>
+            <a href="salones.html">Salones</a>
+          </li>
+          <li class="menu-item">
+            <span class="menu-icono">&#128203;</span>
+            <a href="matriculas.html">Matrículas</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="sidebar-seccion">
+        <h3>Acciones Rápidas</h3>
+        <ul>
+          <li>
+            <button class="acceso-btn" id="sb-nuevo-alumno">&#43; Nuevo Alumno</button>
+          </li>
+          <li>
+            <button class="acceso-btn" id="sb-nuevo-docente">&#43; Nuevo Docente</button>
+          </li>
+          <li>
+            <button class="acceso-btn" id="sb-nuevo-salon">&#43; Nuevo Salón</button>
+          </li>
+        </ul>
+      </section>
+
+      <div class="sidebar-footer">
+        <p>Instituto American Land</p>
+        <p>Pitalito, Huila &bull; Desde 2009</p>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+      <!-- Encabezado -->
+      <div class="encabezado-pagina">
+        <div>
+          <h1>Gestión de Salones</h1>
+          <p id="texto-resumen">Cargando salones...</p>
+        </div>
+        <div class="encabezado-acciones">
+          <button class="btn-accion-header" id="btn-nuevo-salon-header">&#43; Nuevo Salón</button>
+        </div>
+      </div>
+
+      <!-- ── STATS ── -->
+      <div class="grid-stats">
+
+        <div class="stat-card stat-docentes">
+          <div class="stat-icono">&#128198;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-total">0</span>
+            <span class="stat-label">Total de Salones</span>
+          </div>
+          <span class="stat-delta neutro">Registrados</span>
+        </div>
+
+        <div class="stat-card stat-salones">
+          <div class="stat-icono">&#9989;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-activos">0</span>
+            <span class="stat-label">Salones Activos</span>
+          </div>
+          <span class="stat-delta positivo">&#8679; En funcionamiento</span>
+        </div>
+
+        <div class="stat-card stat-alumnos">
+          <div class="stat-icono">&#128101;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-capacidad">0</span>
+            <span class="stat-label">Cupos Ocupados</span>
+          </div>
+          <span class="stat-delta neutro" id="stat-capacidad-detalle">— de 0 cupos</span>
+        </div>
+
+        <div class="stat-card stat-matriculas">
+          <div class="stat-icono">&#9888;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-revision">0</span>
+            <span class="stat-label">En Revisión</span>
+          </div>
+          <span class="stat-delta alerta">Requiere atención</span>
+        </div>
+
+      </div>
+
+      <!-- ── FILTROS ── -->
+      <section class="card-seccion">
+        <div class="filtros-bar">
+          <input type="text" id="filtro-busqueda" class="filtro-input" placeholder="Buscar salón por nombre...">
+
+          <select id="filtro-nivel" class="filtro-select">
+            <option value="todos">Todos los niveles</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+            <option value="C2">C2</option>
+          </select>
+
+          <select id="filtro-estado" class="filtro-select">
+            <option value="todos">Todos los estados</option>
+            <option value="activo">Activo</option>
+            <option value="en-revision">En revisión</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- ── GRID DE SALONES ── -->
+      <section class="card-seccion">
+        <div class="card-header">
+          <h2>Salones Registrados</h2>
+          <span class="badge-conteo" id="badge-resultados">0 resultados</span>
+        </div>
+
+        <div class="grid-salones" id="grid-salones">
+          <!-- Tarjetas generadas por JS -->
+        </div>
+
+        <p class="mensaje-vacio" id="mensaje-vacio" style="display:none;">
+          No se encontraron salones con los filtros seleccionados.
+        </p>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== MODAL NUEVO / EDITAR SALÓN ===== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modal-titulo">Nuevo Salón</h2>
+        <button class="modal-cerrar" id="modal-cerrar">&#10005;</button>
+      </div>
+
+      <form id="form-salon">
+        <input type="hidden" id="salon-id">
+
+        <div class="form-grupo">
+          <label for="salon-nombre">Nombre del salón</label>
+          <input type="text" id="salon-nombre" placeholder="Ej. Salón Toronto" required>
+        </div>
+
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label for="salon-nivel">Nivel</label>
+            <select id="salon-nivel" required>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="B1">B1</option>
+              <option value="B2">B2</option>
+              <option value="C1">C1</option>
+              <option value="C2">C2</option>
+            </select>
+          </div>
+
+          <div class="form-grupo">
+            <label for="salon-color">Color identificador</label>
+            <select id="salon-color">
+              <option value="rojo">Rojo</option>
+              <option value="azul">Azul</option>
+              <option value="morado">Morado</option>
+              <option value="amarillo">Amarillo</option>
+              <option value="verde">Verde</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grupo">
+          <label for="salon-horario">Horario</label>
+          <input type="text" id="salon-horario" placeholder="Ej. Lun–Jue 8:00–12:00" required>
+        </div>
+
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label for="salon-capacidad">Capacidad máxima</label>
+            <input type="number" id="salon-capacidad" min="1" max="50" value="12" required>
+          </div>
+
+          <div class="form-grupo">
+            <label for="salon-alumnos">Alumnos matriculados</label>
+            <input type="number" id="salon-alumnos" min="0" max="50" value="0" required>
+          </div>
+        </div>
+
+        <div class="form-grupo">
+          <label for="salon-estado">Estado</label>
+          <select id="salon-estado">
+            <option value="activo">Activo</option>
+            <option value="en-revision">En revisión</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancelar" id="btn-cancelar">Cancelar</button>
+          <button type="submit" class="btn-guardar">Guardar Salón</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../assets/js/salones_admin.js"></script>
+</body>
+</html>

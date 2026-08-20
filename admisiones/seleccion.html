@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Selecciona tu Nivel, Horario y Método de Pago - Instituto American Land</title>
+</head>
+<body>
+
+  <!-- ===== CONTENEDOR PRINCIPAL ===== -->
+  <main>
+
+    <h1>Selecciona tu Nivel, Horario y Método de Pago</h1>
+
+    <form action="#" method="POST">
+
+      <div>
+
+        <!-- ===== COLUMNA IZQUIERDA ===== -->
+        <div>
+
+          <!-- NIVEL DE INGLÉS -->
+          <fieldset>
+            <legend>* Nivel de Inglés</legend>
+
+            <div>
+              <input type="radio" id="beginner" name="nivel" value="beginner" required />
+              <label for="beginner">
+                <strong>Beginner (A1)</strong>
+                <p>Pueden comunicarse en situaciones cotidianas muy básicas.</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="elementary" name="nivel" value="elementary" />
+              <label for="elementary">
+                <strong>Elementary (A2)</strong>
+                <p>Pueden entender oraciones sobre temas familiares y rutinarios.</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="intermediate_b1" name="nivel" value="intermediate_b1" />
+              <label for="intermediate_b1">
+                <strong>Intermediate (B1)</strong>
+                <p>Pueden entender los puntos principales de textos claros sobre asuntos conocidos.</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="intermediate_b2" name="nivel" value="intermediate_b2" />
+              <label for="intermediate_b2">
+                <strong>Intermediate (B2)</strong>
+                <p>Pueden interactuar con un grado de fluidez y espontaneidad.</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="advanced" name="nivel" value="advanced" />
+              <label for="advanced">
+                <strong>Advanced (C1)</strong>
+                <p>Pueden usar el idioma de forma flexible y efectiva para fines sociales, académicos y profesionales.</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="proficient" name="nivel" value="proficient" />
+              <label for="proficient">
+                <strong>Proficient (C2)</strong>
+                <p>Pueden comprender con facilidad prácticamente todo lo que oyen o leen.</p>
+              </label>
+            </div>
+
+          </fieldset>
+
+          <!-- MÉTODO DE PAGO -->
+          <fieldset>
+            <legend>* Método de Pago</legend>
+
+            <div>
+              <input type="radio" id="tarjeta" name="metodo_pago" value="tarjeta" required />
+              <label for="tarjeta">
+                <strong>Tarjeta de Crédito/Débito</strong>
+                <p>Paga con VISA, Mastercard, American Express.</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="pse" name="metodo_pago" value="pse" />
+              <label for="pse">
+                <strong>PSE</strong>
+                <p>Paga de forma segura desde tu cuenta bancaria.</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="transferencia" name="metodo_pago" value="transferencia" />
+              <label for="transferencia">
+                <strong>Transferencia Bancaria / Billeteras digitales</strong>
+                <p>Realiza una transferencia directa desde tu banco.</p>
+              </label>
+            </div>
+
+          </fieldset>
+
+        </div>
+
+        <!-- ===== COLUMNA DERECHA ===== -->
+        <div>
+
+          <!-- HORARIO PREFERIDO -->
+          <fieldset>
+            <legend>* Horario Preferido</legend>
+
+            <div>
+              <input type="radio" id="manana" name="horario" value="manana" required />
+              <label for="manana">
+                <strong>Mañana</strong>
+                <p>Lunes a Viernes 8:00 AM - 12:00 PM</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="tarde" name="horario" value="tarde" />
+              <label for="tarde">
+                <strong>Tarde</strong>
+                <p>Lunes a Viernes 2:00 PM - 4:00 PM</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="noche" name="horario" value="noche" />
+              <label for="noche">
+                <strong>Noche</strong>
+                <p>Lunes a Viernes 7:00 PM - 9:00 PM</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="fines_manana" name="horario" value="fines_manana" />
+              <label for="fines_manana">
+                <strong>Fines de Semana</strong>
+                <p>Jornada Mañana — Sábado 8:00 AM - 12:00 PM</p>
+              </label>
+            </div>
+
+            <div>
+              <input type="radio" id="fines_tarde" name="horario" value="fines_tarde" />
+              <label for="fines_tarde">
+                <strong>Fines de Semana</strong>
+                <p>Jornada Tarde — Sábado 2:00 PM - 6:00 PM</p>
+              </label>
+            </div>
+
+          </fieldset>
+
+        </div>
+
+      </div>
+
+      <!-- Botón continuar -->
+      <div>
+        <button type="submit">Continuar</button>
+      </div>
+
+    </form>
+
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notas - Portal Docente - Instituto American Land</title>
+  <link rel="stylesheet" href="../assets/css/notas_docente.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
+      <div class="nav-perfil">
+        <div class="nav-avatar" id="nav-avatar">D</div>
+        <div class="nav-info">
+          <span class="nav-nombre" id="nav-nombre">Docente</span>
+          <span class="nav-rol">Docente</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="inicio.html">Inicio</a></li>
+        <li><a href="notas.html" class="activo">Notas</a></li>
+        <li><a href="horario.html">Horario</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+      </ul>
+
+      <div class="nav-acciones">
+        <button class="btn-nav-icon" title="Mensajes">&#128172;</button>
+        <a href="../auth/login.html" class="btn-nav-icon btn-cerrar" title="Cerrar sesión">&#8594;&#124;</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <section class="sidebar-seccion">
+        <h3>Mis Clases</h3>
+        <ul>
+          <li class="clase-item activa">
+            <span class="clase-dot rojo"></span>
+            <a href="inicio.html?salon=canada">Salón Canada</a>
+          </li>
+          <li class="clase-item">
+            <span class="clase-dot azul"></span>
+            <a href="inicio.html?salon=nueva-zelanda">Salón Nueva Zelanda</a>
+          </li>
+          <li class="clase-item">
+            <span class="clase-dot morado"></span>
+            <a href="inicio.html?salon=miami">Salón Miami</a>
+          </li>
+        </ul>
+      </section>
+      <section class="sidebar-seccion">
+        <h3>Accesos Rápidos</h3>
+        <ul>
+          <li><a href="notas.html"   class="acceso-link"><span>&#128203;</span> Ingresar Notas</a></li>
+          <li><a href="tareas.html"  class="acceso-link"><span>&#128218;</span> Ver Tareas</a></li>
+          <li><a href="horario.html" class="acceso-link"><span>&#128197;</span> Mi Horario</a></li>
+        </ul>
+      </section>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+      <!-- Encabezado -->
+      <div class="encabezado-pagina">
+        <div>
+          <h1>Notas</h1>
+          <p>Salón Canadá &nbsp;&#183;&nbsp; A1 &nbsp;&#183;&nbsp; 2026</p>
+        </div>
+        <button class="btn-accion" id="btn-guardar">&#128190; Guardar Notas</button>
+      </div>
+
+      <!-- SELECTOR DE CICLOS -->
+      <div class="ciclos-wrap">
+        <button class="btn-ciclo activo" data-ciclo="1">Ciclo 1</button>
+        <button class="btn-ciclo" data-ciclo="2">Ciclo 2</button>
+        <button class="btn-ciclo" data-ciclo="3">Ciclo 3</button>
+        <button class="btn-ciclo" data-ciclo="4">Ciclo 4</button>
+      </div>
+
+      <!-- ALERTA -->
+      <div class="alerta" id="alerta"></div>
+
+      <!-- TABLA NOTAS -->
+      <section class="card-seccion">
+        <div class="card-header">
+          <div class="card-titulo-wrap">
+            <span class="card-icono">&#128203;</span>
+            <h2>Ingresar / Editar Notas</h2>
+          </div>
+          <div class="tabla-acciones">
+            <span class="promedio-grupo">Promedio Grupo: <strong id="promedio-grupo">—</strong></span>
+          </div>
+        </div>
+
+        <div class="tabla-wrap">
+          <table class="tabla-notas" id="tabla-notas">
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>Ciclo 1</th>
+                <th>Ciclo 2</th>
+                <th>Ciclo 3</th>
+                <th>Ciclo 4</th>
+                <th>Examen</th>
+                <th>Promedio</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-notas">
+
+              <tr data-alumno="Davis Morales">
+                <td>
+                  <div class="alumno-info">
+                    <div class="alumno-avatar">D</div>
+                    Davis Morales
+                  </div>
+                </td>
+                <td><input type="number" class="input-nota" name="ciclo1" value="4.4" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo2" value="5.0" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo3" value="3.9" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo4" value="5.0" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="examen" value="4.8" min="0" max="5" step="0.1" /></td>
+                <td><span class="promedio-alumno nota-alta">4.6</span></td>
+                <td><span class="badge badge-aprobado">Aprobado</span></td>
+              </tr>
+
+              <tr data-alumno="Juliana Garcia">
+                <td>
+                  <div class="alumno-info">
+                    <div class="alumno-avatar">J</div>
+                    Juliana Garcia
+                  </div>
+                </td>
+                <td><input type="number" class="input-nota" name="ciclo1" value="4.0" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo2" value="4.2" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo3" value="3.8" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo4" value="4.5" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="examen" value="4.0" min="0" max="5" step="0.1" /></td>
+                <td><span class="promedio-alumno nota-alta">4.1</span></td>
+                <td><span class="badge badge-aprobado">Aprobado</span></td>
+              </tr>
+
+              <tr data-alumno="Tomas Ospina">
+                <td>
+                  <div class="alumno-info">
+                    <div class="alumno-avatar">T</div>
+                    Tomas Ospina
+                  </div>
+                </td>
+                <td><input type="number" class="input-nota" name="ciclo1" value="2.8" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo2" value="3.1" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo3" value="2.5" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="ciclo4" value="3.0" min="0" max="5" step="0.1" /></td>
+                <td><input type="number" class="input-nota" name="examen" value="2.9" min="0" max="5" step="0.1" /></td>
+                <td><span class="promedio-alumno nota-baja">2.9</span></td>
+                <td><span class="badge badge-riesgo">En Riesgo</span></td>
+              </tr>
+
+              <tr data-alumno="Camila Rios">
+                <td>
+                  <div class="alumno-info">
+                    <div class="alumno-avatar">C</div>
+                    Camila Rios
+                  </div>
+                </td>
+                <td><input type="number" class="input-nota" name="ciclo1" min="0" max="5" step="0.1" placeholder="—" /></td>
+                <td><input type="number" class="input-nota" name="ciclo2" min="0" max="5" step="0.1" placeholder="—" /></td>
+                <td><input type="number" class="input-nota" name="ciclo3" min="0" max="5" step="0.1" placeholder="—" /></td>
+                <td><input type="number" class="input-nota" name="ciclo4" min="0" max="5" step="0.1" placeholder="—" /></td>
+                <td><input type="number" class="input-nota" name="examen" min="0" max="5" step="0.1" placeholder="—" /></td>
+                <td><span class="promedio-alumno nota-pendiente">—</span></td>
+                <td><span class="badge badge-pendiente">Pendiente</span></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="../assets/js/notas_docente.js"></script>
+</body>
+</html>

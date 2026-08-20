@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salón Virtual - Instituto American Land</title>
+  <link rel="stylesheet" href="../assets/css/salon_virtual.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
+      <div class="nav-perfil">
+        <div class="nav-avatar" id="nav-avatar">A</div>
+        <div class="nav-info">
+          <span class="nav-nombre" id="nav-nombre">Estudiante</span>
+          <span class="nav-rol">Estudiante</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="inicio.html">Inicio</a></li>
+        <li><a href="salon_virtual.html" class="activo">Salón Virtual</a></li>
+        <li><a href="horario.html">Horario</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+        <li><a href="notas.html">Notas</a></li>
+      </ul>
+
+      <div class="nav-acciones">
+        <button class="btn-nav-icon" title="Mensajes">&#128172;</button>
+        <a href="../auth/login.html" class="btn-nav-icon btn-cerrar" title="Cerrar sesión">&#8594;&#124;</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <section class="sidebar-seccion">
+        <h3>Mis Clases</h3>
+        <ul>
+          <li class="clase-item activa">
+            <span class="clase-dot"></span>
+            <a href="salon_virtual.html">Salón Canada</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="sidebar-seccion">
+        <h3>Accesos Rápidos</h3>
+        <ul>
+          <li><a href="salon_virtual.html" class="acceso-link"><span>&#128187;</span> Entrar al salón</a></li>
+          <li><a href="tareas.html"        class="acceso-link"><span>&#128203;</span> Mis Tareas</a></li>
+          <li><a href="notas.html"         class="acceso-link"><span>&#9733;</span> Ver Notas</a></li>
+        </ul>
+      </section>
+
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+      <!-- Encabezado -->
+      <section class="encabezado-pagina">
+        <div>
+          <h1>Salón Virtual</h1>
+          <p>L-M-M-J &nbsp;&#183;&nbsp; 8:00AM - 12:00PM</p>
+        </div>
+      </section>
+
+      <!-- TARJETA INFO SALÓN -->
+      <section class="tarjeta-salon">
+        <div class="salon-header">
+          <div class="salon-titulo">
+            <h2>Salón Canada</h2>
+            <span class="salon-flag">&#127464;&#127462;</span>
+          </div>
+          <span class="salon-badge">En curso</span>
+        </div>
+
+        <div class="salon-detalles">
+          <div class="salon-detalle-item">
+            <span class="detalle-icono">&#128197;</span>
+            <div>
+              <p class="detalle-label">Horario</p>
+              <p class="detalle-valor">L-M-M-J &nbsp; 8:00AM - 12:00PM</p>
+            </div>
+          </div>
+          <div class="salon-detalle-item">
+            <span class="detalle-icono">&#128100;</span>
+            <div>
+              <p class="detalle-label">Profesor</p>
+              <p class="detalle-valor">Luis Perez</p>
+            </div>
+          </div>
+          <div class="salon-detalle-item">
+            <span class="detalle-icono">&#128336;</span>
+            <div>
+              <p class="detalle-label">Horas Completadas</p>
+              <p class="detalle-valor">20 / 40 hrs</p>
+            </div>
+          </div>
+          <div class="salon-detalle-item">
+            <span class="detalle-icono">&#128218;</span>
+            <div>
+              <p class="detalle-label">Nivel</p>
+              <p class="detalle-valor">Beginner (A1)</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA DEL SALÓN -->
+      <section class="vista-salon">
+
+        <!-- Etiqueta -->
+        <div class="vista-header">
+          <h2>Vista del Salón</h2>
+          <span class="alumnos-count">&#128100; 10 alumnos conectados</span>
+        </div>
+
+        <!-- Aula -->
+        <div class="aula">
+
+          <!-- Pantalla del profesor -->
+          <div class="pantalla-wrap">
+            <div class="pantalla">
+              <span class="pantalla-icono">&#128187;</span>
+              <p class="pantalla-texto">Pantalla del Profesor</p>
+            </div>
+            <div class="pantalla-base"></div>
+          </div>
+
+          <!-- Grid de estudiantes -->
+          <div class="grid-estudiantes">
+
+            <div class="estudiante-card activo-yo">
+              <div class="est-avatar est-yo">TÚ</div>
+              <p class="est-nombre" id="est-nombre-yo">Tú</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">MA</div>
+              <p class="est-nombre">María A.</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">JR</div>
+              <p class="est-nombre">Juan R.</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">SG</div>
+              <p class="est-nombre">Sofía G.</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">DM</div>
+              <p class="est-nombre">David M.</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">LT</div>
+              <p class="est-nombre">Laura T.</p>
+              <span class="est-estado est-desconectado">&#9679; Ausente</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">CO</div>
+              <p class="est-nombre">Carlos O.</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">VR</div>
+              <p class="est-nombre">Valentina R.</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">AM</div>
+              <p class="est-nombre">Andrés M.</p>
+              <span class="est-estado est-desconectado">&#9679; Ausente</span>
+            </div>
+
+            <div class="estudiante-card">
+              <div class="est-avatar">PL</div>
+              <p class="est-nombre">Paula L.</p>
+              <span class="est-estado est-conectado">&#9679; Conectado</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="../assets/js/salon_virtual.js"></script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horario - Portal Docente - Instituto American Land</title>
+  <link rel="stylesheet" href="../assets/css/horario_docente.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
+      <div class="nav-perfil">
+        <div class="nav-avatar" id="nav-avatar">D</div>
+        <div class="nav-info">
+          <span class="nav-nombre" id="nav-nombre">Docente</span>
+          <span class="nav-rol">Docente</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="inicio.html">Inicio</a></li>
+        <li><a href="notas.html">Notas</a></li>
+        <li><a href="horario.html" class="activo">Horario</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+      </ul>
+
+      <div class="nav-acciones">
+        <button class="btn-nav-icon" title="Mensajes">&#128172;</button>
+        <a href="../auth/login.html" class="btn-nav-icon btn-cerrar" title="Cerrar sesión">&#8594;&#124;</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <section class="sidebar-seccion">
+        <h3>Mis Clases</h3>
+        <ul>
+          <li class="clase-item activa">
+            <span class="clase-dot rojo"></span>
+            <a href="inicio.html?salon=canada">Salón Canada</a>
+          </li>
+          <li class="clase-item">
+            <span class="clase-dot azul"></span>
+            <a href="inicio.html?salon=nueva-zelanda">Salón Nueva Zelanda</a>
+          </li>
+          <li class="clase-item">
+            <span class="clase-dot morado"></span>
+            <a href="inicio.html?salon=miami">Salón Miami</a>
+          </li>
+        </ul>
+      </section>
+      <section class="sidebar-seccion">
+        <h3>Accesos Rápidos</h3>
+        <ul>
+          <li><a href="notas.html"   class="acceso-link"><span>&#128203;</span> Ingresar Notas</a></li>
+          <li><a href="tareas.html"  class="acceso-link"><span>&#128218;</span> Ver Tareas</a></li>
+          <li><a href="horario.html" class="acceso-link"><span>&#128197;</span> Mi Horario</a></li>
+        </ul>
+      </section>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+      <!-- Encabezado -->
+      <div class="encabezado-pagina">
+        <div>
+          <h1>Mi Horario</h1>
+          <p id="texto-semana">Semana 28 Abril &ndash; 2 Mayo &ndash; 2026</p>
+        </div>
+        <div class="encabezado-acciones">
+          <button class="btn-semana" id="btn-anterior">&#8592; Anterior</button>
+          <button class="btn-semana" id="btn-siguiente">Siguiente &#8594;</button>
+        </div>
+      </div>
+
+      <!-- VISTA SEMANAL -->
+      <section class="card-seccion">
+        <h2 class="card-titulo">Vista Semanal</h2>
+
+        <div class="tabla-wrap">
+          <table class="tabla-horario">
+            <thead>
+              <tr>
+                <th class="th-hora">Hora</th>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
+                <th>Sábado</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- 8:00 - 12:00 -->
+              <tr>
+                <td class="td-hora">8:00<br/>12:00</td>
+                <td>
+                  <div class="clase-bloque bloque-canada">
+                    <p class="bloque-nombre">Salón Canadá</p>
+                    <span class="bloque-nivel">A1</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="clase-bloque bloque-canada">
+                    <p class="bloque-nombre">Salón Canadá</p>
+                    <span class="bloque-nivel">A1</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="clase-bloque bloque-canada">
+                    <p class="bloque-nombre">Salón Canadá</p>
+                    <span class="bloque-nivel">A1</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="clase-bloque bloque-canada">
+                    <p class="bloque-nombre">Salón Canadá</p>
+                    <span class="bloque-nivel">A1</span>
+                  </div>
+                </td>
+                <td class="td-vacio"></td>
+                <td>
+                  <div class="clase-bloque bloque-miami">
+                    <p class="bloque-nombre">Salón Miami</p>
+                    <span class="bloque-nivel">C1</span>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- 2:00 - 4:00 -->
+              <tr>
+                <td class="td-hora">14:00<br/>16:00</td>
+                <td>
+                  <div class="clase-bloque bloque-miami">
+                    <p class="bloque-nombre">Salón Miami</p>
+                    <span class="bloque-nivel">B1</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="clase-bloque bloque-miami">
+                    <p class="bloque-nombre">Salón Miami</p>
+                    <span class="bloque-nivel">B1</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="clase-bloque bloque-miami">
+                    <p class="bloque-nombre">Salón Miami</p>
+                    <span class="bloque-nivel">B1</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="clase-bloque bloque-miami">
+                    <p class="bloque-nombre">Salón Miami</p>
+                    <span class="bloque-nivel">B1</span>
+                  </div>
+                </td>
+                <td class="td-vacio"></td>
+                <td class="td-vacio"></td>
+              </tr>
+
+              <!-- 6:00 - 8:00 -->
+              <tr>
+                <td class="td-hora">18:00<br/>20:00</td>
+                <td class="td-vacio"></td>
+                <td class="td-vacio"></td>
+                <td class="td-vacio"></td>
+                <td class="td-vacio"></td>
+                <td class="td-vacio"></td>
+                <td class="td-vacio"></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN INFERIOR -->
+      <div class="grid-inferior">
+
+        <!-- Resumen de carga -->
+        <section class="card-seccion">
+          <div class="card-header">
+            <h2>Resumen de Carga</h2>
+            <span class="horas-total-badge" id="horas-total">26H / Semana</span>
+          </div>
+          <table class="tabla-datos">
+            <thead>
+              <tr>
+                <th>Salón</th>
+                <th>Nivel</th>
+                <th>Horas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="salon-info">
+                    <span class="dot-sm rojo"></span>
+                    Salón Canadá
+                  </div>
+                </td>
+                <td>A1</td>
+                <td><span class="horas-badge morado">16H / Semana</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="salon-info">
+                    <span class="dot-sm morado"></span>
+                    Salón Miami B1
+                  </div>
+                </td>
+                <td>B1</td>
+                <td><span class="horas-badge azul">8H / Semana</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="salon-info">
+                    <span class="dot-sm morado"></span>
+                    Salón Miami C1
+                  </div>
+                </td>
+                <td>C1</td>
+                <td><span class="horas-badge azul">2H / Semana</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Próximas fechas -->
+        <section class="card-seccion">
+          <div class="card-header">
+            <h2>Próximas Fechas Importantes</h2>
+          </div>
+          <div class="lista-fechas">
+
+            <div class="fecha-item">
+              <div class="fecha-dia">
+                <span class="dia-num">30</span>
+                <span class="dia-mes">Abr</span>
+              </div>
+              <div class="fecha-detalle">
+                <p class="fecha-titulo">Actividad Grupal</p>
+                <p class="fecha-sub">Salón Canadá A1</p>
+              </div>
+              <span class="evento-badge evento-actividad">Actividad</span>
+            </div>
+
+            <div class="fecha-item">
+              <div class="fecha-dia">
+                <span class="dia-num">5</span>
+                <span class="dia-mes">May</span>
+              </div>
+              <div class="fecha-detalle">
+                <p class="fecha-titulo">Examen de Ciclo</p>
+                <p class="fecha-sub">Todos los salones</p>
+              </div>
+              <span class="evento-badge evento-examen">Examen</span>
+            </div>
+
+            <div class="fecha-item">
+              <div class="fecha-dia">
+                <span class="dia-num">12</span>
+                <span class="dia-mes">May</span>
+              </div>
+              <div class="fecha-detalle">
+                <p class="fecha-titulo">Entrega de Notas</p>
+                <p class="fecha-sub">Fecha límite</p>
+              </div>
+              <span class="evento-badge evento-nota">Notas</span>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../assets/js/horario_docente.js"></script>
+</body>
+</html>

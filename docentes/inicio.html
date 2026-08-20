@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Docente - Instituto American Land</title>
+  <link rel="stylesheet" href="../assets/css/inicio_docente.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
+      <div class="nav-perfil">
+        <div class="nav-avatar" id="nav-avatar">D</div>
+        <div class="nav-info">
+          <span class="nav-nombre" id="nav-nombre">Docente</span>
+          <span class="nav-rol">Docente</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="inicio.html" class="activo">Inicio</a></li>
+        <li><a href="notas.html">Notas</a></li>
+        <li><a href="horario.html">Horario</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+      </ul>
+
+      <div class="nav-acciones">
+        <button class="btn-nav-icon" title="Mensajes">&#128172;</button>
+        <a href="../auth/login.html" class="btn-nav-icon btn-cerrar" title="Cerrar sesión">&#8594;&#124;</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <section class="sidebar-seccion">
+        <h3>Mis Clases</h3>
+        <ul>
+          <li class="clase-item activa">
+            <span class="clase-dot rojo"></span>
+            <a href="inicio.html?salon=canada">Salón Canada</a>
+          </li>
+          <li class="clase-item">
+            <span class="clase-dot azul"></span>
+            <a href="inicio.html?salon=nueva-zelanda">Salón Nueva Zelanda</a>
+          </li>
+          <li class="clase-item">
+            <span class="clase-dot morado"></span>
+            <a href="inicio.html?salon=miami">Salón Miami</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="sidebar-seccion">
+        <h3>Accesos Rápidos</h3>
+        <ul>
+          <li><a href="notas.html"   class="acceso-link"><span>&#128203;</span> Ingresar Notas</a></li>
+          <li><a href="tareas.html"  class="acceso-link"><span>&#128218;</span> Ver Tareas</a></li>
+          <li><a href="horario.html" class="acceso-link"><span>&#128197;</span> Mi Horario</a></li>
+        </ul>
+      </section>
+
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+      <!-- Encabezado salón -->
+      <section class="encabezado-salon">
+        <div class="encabezado-info">
+          <h1>Salón Canada</h1>
+          <p>L-M-M-J &nbsp;&#183;&nbsp; 8:00AM - 12:00PM &nbsp;&#183;&nbsp; 40 Horas</p>
+        </div>
+        <a href="notas.html" class="btn-accion">&#43; Ingresar Nota</a>
+      </section>
+
+      <!-- TARJETAS ESTADÍSTICAS -->
+      <section class="grid-stats">
+
+        <div class="stat-card">
+          <div class="stat-icono">&#128101;</div>
+          <div class="stat-info">
+            <h3>Alumnos</h3>
+            <p class="stat-valor">14</p>
+            <span class="stat-sub">Activos este ciclo</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icono">&#11088;</div>
+          <div class="stat-info">
+            <h3>Promedio</h3>
+            <p class="stat-valor">3.9</p>
+            <span class="stat-sub">Sobre 5.0</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icono">&#128336;</div>
+          <div class="stat-info">
+            <h3>Horas</h3>
+            <p class="stat-valor">20/40</p>
+            <span class="stat-sub">50% Avance</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-alerta">
+          <div class="stat-icono">&#128203;</div>
+          <div class="stat-info">
+            <h3>Tareas</h3>
+            <p class="stat-valor">3</p>
+            <span class="stat-sub">Pendientes por revisión</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- SECCIÓN INFERIOR -->
+      <div class="grid-inferior">
+
+        <!-- Resumen alumnos -->
+        <section class="card-seccion">
+          <div class="card-header">
+            <h2>Resumen Alumnos</h2>
+            <a href="notas.html" class="ver-todos">Ver todas las notas &#8594;</a>
+          </div>
+          <table class="tabla-datos">
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>Asistencia</th>
+                <th>Última Nota</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="alumno-info">
+                    <div class="alumno-avatar">D</div>
+                    Davis Morales
+                  </div>
+                </td>
+                <td>92%</td>
+                <td><span class="nota-badge nota-alta">5.0</span></td>
+                <td><span class="badge badge-excelente">Excelente</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="alumno-info">
+                    <div class="alumno-avatar">J</div>
+                    Juliana Garcia
+                  </div>
+                </td>
+                <td>85%</td>
+                <td><span class="nota-badge nota-alta">4.5</span></td>
+                <td><span class="badge badge-bueno">Bueno</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="alumno-info">
+                    <div class="alumno-avatar">T</div>
+                    Tomas Ospina
+                  </div>
+                </td>
+                <td>60%</td>
+                <td><span class="nota-badge nota-media">3.2</span></td>
+                <td><span class="badge badge-riesgo">En Riesgo</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Actividad reciente -->
+        <section class="card-seccion">
+          <div class="card-header">
+            <h2>Actividad Reciente</h2>
+          </div>
+          <ul class="lista-actividad">
+            <li class="actividad-item">
+              <div class="act-icono verde">&#10003;</div>
+              <div class="act-detalle">
+                <p class="act-texto">Davis Morales entregó <strong>Exposición Oral</strong></p>
+                <p class="act-tiempo">Hace 2 horas</p>
+              </div>
+            </li>
+            <li class="actividad-item">
+              <div class="act-icono amarillo">&#9888;</div>
+              <div class="act-detalle">
+                <p class="act-texto">Tomas Ospina tiene asistencia baja <strong>60%</strong></p>
+                <p class="act-tiempo">Hoy</p>
+              </div>
+            </li>
+            <li class="actividad-item">
+              <div class="act-icono morado">&#11088;</div>
+              <div class="act-detalle">
+                <p class="act-texto">Nota ingresada a <strong>Juliana Garcia</strong> — 4.5</p>
+                <p class="act-tiempo">Ayer</p>
+              </div>
+            </li>
+            <li class="actividad-item">
+              <div class="act-icono azul">&#128203;</div>
+              <div class="act-detalle">
+                <p class="act-texto">Nueva tarea publicada: <strong>Writing Essay</strong></p>
+                <p class="act-tiempo">Hace 2 días</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../assets/js/inicio_docente.js"></script>
+</body>
+</html>

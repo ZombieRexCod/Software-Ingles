@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matrículas - Panel Admin - Instituto American Land</title>
+  <link rel="stylesheet" href="../assets/css/inicio_admin.css" />
+  <link rel="stylesheet" href="../assets/css/matriculas_admin.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
+      <div class="nav-perfil">
+        <div class="nav-avatar" id="nav-avatar">A</div>
+        <div class="nav-info">
+          <span class="nav-nombre" id="nav-nombre">Administrador</span>
+          <span class="nav-rol">Admin</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="inicio.html">Inicio</a></li>
+        <li><a href="docentes.html">Docentes</a></li>
+        <li><a href="alumnos.html">Alumnos</a></li>
+        <li><a href="salones.html">Salones</a></li>
+        <li><a href="matriculas.html" class="activo">Matrículas</a></li>
+      </ul>
+
+      <div class="nav-acciones">
+        <button class="btn-nav-icon" title="Notificaciones" id="btn-notif">&#128276;</button>
+        <a href="../auth/login.html" class="btn-nav-icon btn-cerrar" title="Cerrar sesión">&#8594;&#124;</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <section class="sidebar-seccion">
+        <h3>Panel Admin</h3>
+        <ul>
+          <li class="menu-item">
+            <span class="menu-icono">&#127968;</span>
+            <a href="inicio.html">Inicio</a>
+          </li>
+          <li class="menu-item">
+            <span class="menu-icono">&#128104;&#8205;&#127979;</span>
+            <a href="docentes.html">Docentes</a>
+          </li>
+          <li class="menu-item">
+            <span class="menu-icono">&#127891;</span>
+            <a href="alumnos.html">Alumnos</a>
+          </li>
+          <li class="menu-item">
+            <span class="menu-icono">&#128198;</span>
+            <a href="salones.html">Salones</a>
+          </li>
+          <li class="menu-item activo">
+            <span class="menu-icono">&#128203;</span>
+            <a href="matriculas.html">Matrículas</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="sidebar-seccion">
+        <h3>Acciones Rápidas</h3>
+        <ul>
+          <li>
+            <button class="acceso-btn" id="sb-nuevo-alumno">&#43; Nuevo Alumno</button>
+          </li>
+          <li>
+            <button class="acceso-btn" id="sb-nuevo-docente">&#43; Nuevo Docente</button>
+          </li>
+          <li>
+            <button class="acceso-btn" id="sb-nuevo-salon">&#43; Nuevo Salón</button>
+          </li>
+        </ul>
+      </section>
+
+      <div class="sidebar-footer">
+        <p>Instituto American Land</p>
+        <p>Pitalito, Huila &bull; Desde 2009</p>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+      <!-- Encabezado -->
+      <div class="encabezado-pagina">
+        <div>
+          <h1>Gestión de Matrículas</h1>
+          <p id="texto-fecha">Cargando fecha...</p>
+        </div>
+        <div class="encabezado-acciones">
+          <button class="btn-accion-header" id="btn-abrir-modal">&#43; Nueva Matrícula</button>
+        </div>
+      </div>
+
+      <!-- ── STATS ── -->
+      <div class="grid-stats">
+
+        <div class="stat-card stat-matriculas">
+          <div class="stat-icono">&#128203;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-total">0</span>
+            <span class="stat-label">Total Matrículas</span>
+          </div>
+          <span class="stat-delta neutro">Registro histórico</span>
+        </div>
+
+        <div class="stat-card" style="position:relative;">
+          <div class="stat-icono">&#9203;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-pendientes">0</span>
+            <span class="stat-label">Pendientes</span>
+          </div>
+          <span class="stat-delta alerta">&#9888; Requiere revisión</span>
+        </div>
+
+        <div class="stat-card stat-aprobadas">
+          <div class="stat-icono">&#9989;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-aprobadas">0</span>
+            <span class="stat-label">Aprobadas</span>
+          </div>
+          <span class="stat-delta positivo">&#8679; Al día</span>
+        </div>
+
+        <div class="stat-card stat-rechazadas">
+          <div class="stat-icono">&#10060;</div>
+          <div class="stat-info">
+            <span class="stat-numero" id="stat-rechazadas">0</span>
+            <span class="stat-label">Rechazadas</span>
+          </div>
+          <span class="stat-delta neutro">&#8212; Este mes</span>
+        </div>
+
+      </div>
+
+      <!-- ── FILTROS ── -->
+      <section class="card-seccion">
+        <div class="filtros-bar">
+
+          <div class="campo-busqueda">
+            <span class="icono-buscar">&#128269;</span>
+            <input type="text" id="input-busqueda" class="input-busqueda" placeholder="Buscar por nombre o código..." />
+          </div>
+
+          <select id="filtro-estado" class="select-filtro">
+            <option value="todos">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="aprobado">Aprobado</option>
+            <option value="rechazado">Rechazado</option>
+          </select>
+
+          <select id="filtro-nivel" class="select-filtro">
+            <option value="todos">Todos los niveles</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+          </select>
+
+          <select id="filtro-salon" class="select-filtro">
+            <option value="todos">Todos los salones</option>
+            <option value="Canadá">Canadá</option>
+            <option value="Nueva Zelanda">Nueva Zelanda</option>
+            <option value="Miami">Miami</option>
+            <option value="Londres">Londres</option>
+          </select>
+
+          <button class="btn-reset-filtros" id="btn-reset-filtros">Limpiar filtros</button>
+        </div>
+      </section>
+
+      <!-- ── TABLA DE MATRÍCULAS ── -->
+      <section class="card-seccion">
+        <div class="card-header">
+          <h2>Listado de Matrículas</h2>
+          <span class="badge-conteo" id="badge-actividad">2026</span>
+        </div>
+
+        <div class="tabla-wrap">
+          <table class="tabla-matriculas">
+            <thead>
+              <tr>
+                <th>N° Matrícula</th>
+                <th>Estudiante</th>
+                <th>Nivel</th>
+                <th>Salón</th>
+                <th>Método de Pago</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-matriculas">
+              <!-- Las filas se generan dinámicamente desde matriculas_admin.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <p class="info-resultados" id="info-resultados"></p>
+        <div class="paginacion" id="paginacion"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== MODAL NUEVA MATRÍCULA ===== -->
+  <div class="modal-overlay" id="modal-nueva-matricula">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Nueva Matrícula</h2>
+        <button class="btn-cerrar-modal" id="btn-cerrar-modal">&#10005;</button>
+      </div>
+
+      <form class="modal-form" id="form-nueva-matricula">
+        <div class="form-grupo">
+          <label for="input-nombre-alumno">Nombre del estudiante</label>
+          <input type="text" id="input-nombre-alumno" placeholder="Ej. María Fernanda López" required />
+        </div>
+
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label for="select-nivel-modal">Nivel</label>
+            <select id="select-nivel-modal" required>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="B1">B1</option>
+              <option value="B2">B2</option>
+              <option value="C1">C1</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label for="select-salon-modal">Salón</label>
+            <select id="select-salon-modal" required>
+              <option value="Canadá">Canadá</option>
+              <option value="Nueva Zelanda">Nueva Zelanda</option>
+              <option value="Miami">Miami</option>
+              <option value="Londres">Londres</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grupo">
+          <label for="select-metodo-modal">Método de pago</label>
+          <select id="select-metodo-modal" required>
+            <option value="pse">PSE</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="tarjeta">Tarjeta</option>
+          </select>
+        </div>
+
+        <div class="modal-acciones">
+          <button type="button" class="btn-modal-cancelar" id="btn-modal-cancelar">Cancelar</button>
+          <button type="submit" class="btn-modal-guardar">Registrar Matrícula</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../assets/js/matriculas_admin.js"></script>
+</body>
+</html>

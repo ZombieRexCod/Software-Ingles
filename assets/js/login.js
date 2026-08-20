@@ -1,0 +1,92 @@
+/* ============================================================
+   login.js — Funcionalidad de la página de inicio de sesión
+   Instituto American Land
+============================================================ */
+
+const form       = document.getElementById('form-login');
+const btnSubmit  = document.getElementById('btn-submit');
+const alerta     = document.getElementById('alerta-global');
+const inputPass  = document.getElementById('contrasena');
+const togglePass = document.getElementById('toggle-pass');
+
+// 1. MOSTRAR / OCULTAR CONTRASEÑA
+togglePass.addEventListener('click', function () {
+  const esPassword = inputPass.type === 'password';
+  inputPass.type   = esPassword ? 'text' : 'password';
+  togglePass.textContent = esPassword ? '🙈' : '👁️';
+});
+
+// 2. FUNCIÓN REUTILIZABLE DE VALIDACIÓN
+function validarCampo(input, errorId, condicion, mensaje) {
+  const msgError = document.getElementById(errorId);
+  if (!condicion) {
+    input.classList.add('invalido');
+    msgError.textContent = mensaje;
+    msgError.classList.add('visible');
+    return false;
+  } else {
+    input.classList.remove('invalido');
+    msgError.classList.remove('visible');
+    return true;
+  }
+}
+
+// 3. VALIDACIÓN EN TIEMPO REAL (al salir de cada campo)
+document.getElementById('correo').addEventListener('blur', function () {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  validarCampo(this, 'error-correo', regex.test(this.value), 'Ingresa un correo electrónico válido.');
+});
+
+inputPass.addEventListener('blur', function () {
+  validarCampo(this, 'error-contrasena', this.value.length >= 6, 'La contraseña debe tener al menos 6 caracteres.');
+});
+
+document.getElementById('rol').addEventListener('change', function () {
+  validarCampo(this, 'error-rol', this.value !== '', 'Selecciona un rol para continuar.');
+});
+
+// 4. VALIDACIÓN Y ENVÍO DEL FORMULARIO
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const correo     = document.getElementById('correo');
+  const contrasena = document.getElementById('contrasena');
+  const rol        = document.getElementById('rol');
+  const regex      = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const v1 = validarCampo(correo,     'error-correo',     regex.test(correo.value),      'Ingresa un correo electrónico válido.');
+  const v2 = validarCampo(contrasena, 'error-contrasena', contrasena.value.length >= 6,  'La contraseña debe tener al menos 6 caracteres.');
+  const v3 = validarCampo(rol,        'error-rol',        rol.value !== '',              'Selecciona un rol para continuar.');
+
+  if (!v1 || !v2 || !v3) return;
+
+  // Estado cargando
+  btnSubmit.classList.add('cargando');
+  btnSubmit.textContent = 'Verificando...';
+
+  setTimeout(function () {
+    btnSubmit.classList.remove('cargando');
+    btnSubmit.textContent = 'Iniciar Sesión';
+
+    // Guardar datos en sessionStorage para usarlos en los portales
+    const nombreUsuario = correo.value.split('@')[0]; // Usa la parte antes del @ como nombre provisional
+    sessionStorage.setItem('rol',    rol.value);
+    sessionStorage.setItem('nombre', nombreUsuario);
+    sessionStorage.setItem('correo', correo.value);
+
+    // Mostrar éxito
+    alerta.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
+    alerta.className   = 'alerta exito visible';
+
+    // Redirigir según rol
+    setTimeout(function () {
+      const destinos = {
+        estudiante: '../alumnos/inicio.html',
+        docente:    '../docente/inicio.html',
+        admin:      '../admin/inicio.html'
+      };
+      window.location.href = destinos[rol.value] || '../index.html';
+    }, 1500);
+
+  }, 1200);
+});

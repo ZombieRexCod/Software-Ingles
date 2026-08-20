@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notas - Instituto American Land</title>
+  <link rel="stylesheet" href="../assets/css/notas.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
+      <div class="nav-perfil">
+        <div class="nav-avatar" id="nav-avatar">E</div>
+        <div class="nav-info">
+          <span class="nav-nombre" id="nav-nombre">Estudiante</span>
+          <span class="nav-rol">Estudiante</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="inicio.html">Inicio</a></li>
+        <li><a href="salon_virtual.html">Salón Virtual</a></li>
+        <li><a href="horario.html">Horario</a></li>
+        <li><a href="tareas.html">Tareas</a></li>
+        <li><a href="notas.html" class="activo">Notas</a></li>
+      </ul>
+
+      <div class="nav-acciones">
+        <button class="btn-nav-icon" title="Mensajes">&#128172;</button>
+        <a href="../auth/login.html" class="btn-nav-icon btn-cerrar" title="Cerrar sesión">&#8594;&#124;</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <section class="sidebar-seccion">
+        <h3>Mis Clases</h3>
+        <ul>
+          <li class="clase-item">
+            <span class="clase-dot"></span>
+            <a href="salon_virtual.html">Salón Canada</a>
+          </li>
+        </ul>
+      </section>
+      <section class="sidebar-seccion">
+        <h3>Accesos Rápidos</h3>
+        <ul>
+          <li><a href="salon_virtual.html" class="acceso-link"><span>&#128187;</span> Entrar al salón</a></li>
+          <li><a href="tareas.html"        class="acceso-link"><span>&#128203;</span> Mis Tareas</a></li>
+          <li><a href="notas.html"         class="acceso-link"><span>&#9733;</span> Ver Notas</a></li>
+        </ul>
+      </section>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+      <!-- Encabezado -->
+      <div class="encabezado-pagina">
+        <div>
+          <h1>Notas</h1>
+          <p>Nivel A1 &nbsp;&#183;&nbsp; Ciclo 1, 2, 3, 4</p>
+        </div>
+        <div class="promedio-general">
+          <span class="promedio-label">Promedio General</span>
+          <span class="promedio-valor" id="promedio-general">4.6</span>
+          <span class="promedio-sub">Sobre 5.0</span>
+        </div>
+      </div>
+
+      <!-- TARJETAS DE CICLOS -->
+      <section class="grid-ciclos">
+
+        <div class="ciclo-card" id="ciclo-card-1">
+          <div class="ciclo-header">
+            <span class="ciclo-label">Ciclo 1</span>
+            <span class="ciclo-estado completado">Completado</span>
+          </div>
+          <p class="ciclo-nota" id="nota-ciclo-1">4.5</p>
+          <p class="ciclo-examen">Examen Final: <strong>4.5</strong></p>
+          <div class="ciclo-barra-wrap">
+            <div class="ciclo-barra" style="width: 90%"></div>
+          </div>
+        </div>
+
+        <div class="ciclo-card" id="ciclo-card-2">
+          <div class="ciclo-header">
+            <span class="ciclo-label">Ciclo 2</span>
+            <span class="ciclo-estado completado">Completado</span>
+          </div>
+          <p class="ciclo-nota" id="nota-ciclo-2">3.9</p>
+          <p class="ciclo-examen">Examen Final: <strong>5.0</strong></p>
+          <div class="ciclo-barra-wrap">
+            <div class="ciclo-barra" style="width: 78%"></div>
+          </div>
+        </div>
+
+        <div class="ciclo-card" id="ciclo-card-3">
+          <div class="ciclo-header">
+            <span class="ciclo-label">Ciclo 3</span>
+            <span class="ciclo-estado completado">Completado</span>
+          </div>
+          <p class="ciclo-nota" id="nota-ciclo-3">4.8</p>
+          <p class="ciclo-examen">Examen Final: <strong>5.0</strong></p>
+          <div class="ciclo-barra-wrap">
+            <div class="ciclo-barra" style="width: 96%"></div>
+          </div>
+        </div>
+
+        <div class="ciclo-card ciclo-pendiente" id="ciclo-card-4">
+          <div class="ciclo-header">
+            <span class="ciclo-label">Ciclo 4</span>
+            <span class="ciclo-estado pendiente">Pendiente</span>
+          </div>
+          <p class="ciclo-nota ciclo-nota-gris">—</p>
+          <p class="ciclo-examen">Examen Final: <strong>Próximamente</strong></p>
+          <div class="ciclo-barra-wrap">
+            <div class="ciclo-barra" style="width: 0%"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- HISTORIAL COMPLETO -->
+      <section class="card-seccion">
+        <div class="card-header">
+          <h2>Historial Completo</h2>
+          <!-- Filtro por ciclo -->
+          <div class="filtro-wrap">
+            <button class="btn-filtro activo" data-ciclo="todos">Todos</button>
+            <button class="btn-filtro" data-ciclo="1">Ciclo 1</button>
+            <button class="btn-filtro" data-ciclo="2">Ciclo 2</button>
+            <button class="btn-filtro" data-ciclo="3">Ciclo 3</button>
+            <button class="btn-filtro" data-ciclo="4">Ciclo 4</button>
+          </div>
+        </div>
+
+        <table class="tabla-datos" id="tabla-historial">
+          <thead>
+            <tr>
+              <th>Actividad</th>
+              <th>Ciclo</th>
+              <th>Fecha</th>
+              <th>Nota</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-historial">
+            <tr data-ciclo="1">
+              <td>Actividad Speaking</td>
+              <td>Ciclo 1</td>
+              <td>25 Abril</td>
+              <td><span class="nota-badge nota-alta">4.8</span></td>
+              <td><span class="badge badge-aprobado">Aprobado</span></td>
+            </tr>
+            <tr data-ciclo="1">
+              <td>Presentación Oral</td>
+              <td>Ciclo 1</td>
+              <td>28 Abril</td>
+              <td><span class="nota-badge nota-alta">4.5</span></td>
+              <td><span class="badge badge-revisado">Revisado</span></td>
+            </tr>
+            <tr data-ciclo="2">
+              <td>Writing Essay</td>
+              <td>Ciclo 2</td>
+              <td>10 Mayo</td>
+              <td><span class="nota-badge nota-media">3.9</span></td>
+              <td><span class="badge badge-aprobado">Aprobado</span></td>
+            </tr>
+            <tr data-ciclo="2">
+              <td>Listening Test</td>
+              <td>Ciclo 2</td>
+              <td>15 Mayo</td>
+              <td><span class="nota-badge nota-alta">4.2</span></td>
+              <td><span class="badge badge-aprobado">Aprobado</span></td>
+            </tr>
+            <tr data-ciclo="3">
+              <td>Debate en Clase</td>
+              <td>Ciclo 3</td>
+              <td>3 Junio</td>
+              <td><span class="nota-badge nota-alta">4.8</span></td>
+              <td><span class="badge badge-aprobado">Aprobado</span></td>
+            </tr>
+            <tr data-ciclo="3">
+              <td>Reading Comprehension</td>
+              <td>Ciclo 3</td>
+              <td>8 Junio</td>
+              <td><span class="nota-badge nota-alta">5.0</span></td>
+              <td><span class="badge badge-aprobado">Aprobado</span></td>
+            </tr>
+            <tr data-ciclo="4">
+              <td>Examen Final</td>
+              <td>Ciclo 4</td>
+              <td>Próximamente</td>
+              <td><span class="nota-badge nota-pendiente">—</span></td>
+              <td><span class="badge badge-pendiente">Pendiente</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script src="../assets/js/notas.js"></script>
+</body>
+</html>
