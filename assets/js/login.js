@@ -8,6 +8,7 @@ const btnSubmit  = document.getElementById('btn-submit');
 const alerta     = document.getElementById('alerta-global');
 const inputPass  = document.getElementById('contrasena');
 const togglePass = document.getElementById('toggle-pass');
+const API_URL = window.location.origin + '/api'; 'window.location.origin'
 
 // 1. MOSTRAR / OCULTAR CONTRASEÑA
 togglePass.addEventListener('click', function () {
@@ -46,7 +47,7 @@ document.getElementById('rol').addEventListener('change', function () {
 });
 
 // 4. VALIDACIÓN Y ENVÍO DEL FORMULARIO
-form.addEventListener('submit', function (e) {
+form.addEventListener('submit', async function (e) {
   e.preventDefault();
 
   const correo     = document.getElementById('correo');
@@ -64,15 +65,33 @@ form.addEventListener('submit', function (e) {
   btnSubmit.classList.add('cargando');
   btnSubmit.textContent = 'Verificando...';
 
-  setTimeout(function () {
+  try {
+    const respuesta = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        correo: correo.value,
+        contrasena: contrasena.value,
+        rol: rol.value
+      })
+    });
+
+    const datos = await respuesta.json();
+
     btnSubmit.classList.remove('cargando');
     btnSubmit.textContent = 'Iniciar Sesión';
 
-    // Guardar datos en sessionStorage para usarlos en los portales
-    const nombreUsuario = correo.value.split('@')[0]; // Usa la parte antes del @ como nombre provisional
-    sessionStorage.setItem('rol',    rol.value);
-    sessionStorage.setItem('nombre', nombreUsuario);
-    sessionStorage.setItem('correo', correo.value);
+    if (!respuesta.ok) {
+      alerta.textContent = datos.mensaje || 'Correo o contraseña incorrectos.';
+      alerta.className   = 'alerta error visible';
+      return;
+    }
+
+    // Guardar token y datos reales del usuario
+    sessionStorage.setItem('token',  datos.token);
+    sessionStorage.setItem('rol',    datos.usuario.rol);
+    sessionStorage.setItem('nombre', datos.usuario.nombre_completo);
+    sessionStorage.setItem('correo', datos.usuario.correo);
 
     // Mostrar éxito
     alerta.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
@@ -82,11 +101,16 @@ form.addEventListener('submit', function (e) {
     setTimeout(function () {
       const destinos = {
         estudiante: '../alumnos/inicio.html',
-        docente:    '../docente/inicio.html',
+        docente:    '../docentes/inicio.html',
         admin:      '../admin/inicio.html'
       };
       window.location.href = destinos[rol.value] || '../index.html';
     }, 1500);
 
-  }, 1200);
+  } catch (error) {
+    btnSubmit.classList.remove('cargando');
+    btnSubmit.textContent = 'Iniciar Sesión';
+    alerta.textContent = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+    alerta.className   = 'alerta error visible';
+  }
 });

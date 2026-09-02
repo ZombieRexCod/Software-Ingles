@@ -8,6 +8,7 @@ const btnSubmit  = document.getElementById('btn-submit');
 const alerta     = document.getElementById('alerta-global');
 const inputPass  = document.getElementById('contrasena');
 const inputPass2 = document.getElementById('confirmar-contrasena');
+const API_URL    = window.location.origin + '/api';
 
 // ── 1. MOSTRAR / OCULTAR CONTRASEÑA ────────────────────────
 document.getElementById('toggle-pass').addEventListener('click', function () {
@@ -95,7 +96,7 @@ document.getElementById('matricula').addEventListener('blur', function () {
 });
 
 // ── 4. VALIDACIÓN COMPLETA AL ENVIAR ───────────────────────
-form.addEventListener('submit', function (e) {
+form.addEventListener('submit', async function (e) {
   e.preventDefault();
   alerta.className = 'alerta';
 
@@ -132,14 +133,39 @@ form.addEventListener('submit', function (e) {
     return;
   }
 
-  // Estado cargando
+   // Estado cargando
   btnSubmit.classList.add('cargando');
   btnSubmit.textContent = 'Registrando...';
 
-  // Simular petición al servidor
-  setTimeout(function () {
+  try {
+    const respuesta = await fetch(`${API_URL}/auth/registro`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre_completo: nombre.value.trim(),
+        correo: correo.value.trim(),
+        contrasena: contrasena.value,
+        rol: 'estudiante',
+        telefono: telefono.value.trim(),
+        fecha_nacimiento: fecha.value,
+        pais: pais.value.trim(),
+        ciudad: ciudad.value.trim(),
+        datosPerfil: {
+          codigo_estudiante: matricula.value.trim()
+        }
+      })
+    });
+
+    const datos = await respuesta.json();
+
     btnSubmit.classList.remove('cargando');
     btnSubmit.textContent = 'Registrarse';
+
+    if (!respuesta.ok) {
+      alerta.textContent = datos.mensaje || 'No se pudo completar el registro.';
+      alerta.className   = 'alerta error visible';
+      return;
+    }
 
     alerta.textContent = '¡Cuenta creada exitosamente! Redirigiendo al login...';
     alerta.className   = 'alerta exito visible';
@@ -147,5 +173,11 @@ form.addEventListener('submit', function (e) {
     setTimeout(function () {
       window.location.href = 'login.html';
     }, 2000);
-  }, 1400);
+
+  } catch (error) {
+    btnSubmit.classList.remove('cargando');
+    btnSubmit.textContent = 'Registrarse';
+    alerta.textContent = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+    alerta.className   = 'alerta error visible';
+  }
 });

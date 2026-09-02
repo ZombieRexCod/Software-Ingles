@@ -3,169 +3,201 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Selecciona tu Nivel, Horario y Método de Pago - Instituto American Land</title>
+  <title>Admisiones — Instituto American Land</title>
+
+  <!-- CSS compartido del sitio (navbar, footer, botones, variables) -->
+  <link rel="stylesheet" href="../assets/css/index.css" />
+  <!-- CSS propio de esta página -->
+  <link rel="stylesheet" href="../assets/css/seleccion.css" />
 </head>
 <body>
 
-  <!-- ===== CONTENEDOR PRINCIPAL ===== -->
-  <main>
+  <!-- ===== NAVBAR ===== -->
+  <header>
+    <nav>
 
-    <h1>Selecciona tu Nivel, Horario y Método de Pago</h1>
-
-    <form action="#" method="POST">
-
-      <div>
-
-        <!-- ===== COLUMNA IZQUIERDA ===== -->
-        <div>
-
-          <!-- NIVEL DE INGLÉS -->
-          <fieldset>
-            <legend>* Nivel de Inglés</legend>
-
-            <div>
-              <input type="radio" id="beginner" name="nivel" value="beginner" required />
-              <label for="beginner">
-                <strong>Beginner (A1)</strong>
-                <p>Pueden comunicarse en situaciones cotidianas muy básicas.</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="elementary" name="nivel" value="elementary" />
-              <label for="elementary">
-                <strong>Elementary (A2)</strong>
-                <p>Pueden entender oraciones sobre temas familiares y rutinarios.</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="intermediate_b1" name="nivel" value="intermediate_b1" />
-              <label for="intermediate_b1">
-                <strong>Intermediate (B1)</strong>
-                <p>Pueden entender los puntos principales de textos claros sobre asuntos conocidos.</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="intermediate_b2" name="nivel" value="intermediate_b2" />
-              <label for="intermediate_b2">
-                <strong>Intermediate (B2)</strong>
-                <p>Pueden interactuar con un grado de fluidez y espontaneidad.</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="advanced" name="nivel" value="advanced" />
-              <label for="advanced">
-                <strong>Advanced (C1)</strong>
-                <p>Pueden usar el idioma de forma flexible y efectiva para fines sociales, académicos y profesionales.</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="proficient" name="nivel" value="proficient" />
-              <label for="proficient">
-                <strong>Proficient (C2)</strong>
-                <p>Pueden comprender con facilidad prácticamente todo lo que oyen o leen.</p>
-              </label>
-            </div>
-
-          </fieldset>
-
-          <!-- MÉTODO DE PAGO -->
-          <fieldset>
-            <legend>* Método de Pago</legend>
-
-            <div>
-              <input type="radio" id="tarjeta" name="metodo_pago" value="tarjeta" required />
-              <label for="tarjeta">
-                <strong>Tarjeta de Crédito/Débito</strong>
-                <p>Paga con VISA, Mastercard, American Express.</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="pse" name="metodo_pago" value="pse" />
-              <label for="pse">
-                <strong>PSE</strong>
-                <p>Paga de forma segura desde tu cuenta bancaria.</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="transferencia" name="metodo_pago" value="transferencia" />
-              <label for="transferencia">
-                <strong>Transferencia Bancaria / Billeteras digitales</strong>
-                <p>Realiza una transferencia directa desde tu banco.</p>
-              </label>
-            </div>
-
-          </fieldset>
-
+      <a href="../index.html#inicio" class="nav-marca">
+        <img src="../assets/img/Logo.png" alt="Logo" class="nav-marca-logo" />
+        <div class="nav-marca-texto">
+          <strong>American Land</strong>
+          <span>Since 2009</span>
         </div>
+      </a>
 
-        <!-- ===== COLUMNA DERECHA ===== -->
-        <div>
+      <div class="nav-divider"></div>
 
-          <!-- HORARIO PREFERIDO -->
-          <fieldset>
-            <legend>* Horario Preferido</legend>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="../index.html#inicio">Inicio</a></li>
+        <li><a href="seleccion.html" class="activo">Admisión</a></li>
+        <li><a href="estudiantes.html">Estudiantes</a></li>
+        <li><a href="../index.html#contacto">Contacto</a></li>
+      </ul>
 
-            <div>
-              <input type="radio" id="manana" name="horario" value="manana" required />
-              <label for="manana">
-                <strong>Mañana</strong>
-                <p>Lunes a Viernes 8:00 AM - 12:00 PM</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="tarde" name="horario" value="tarde" />
-              <label for="tarde">
-                <strong>Tarde</strong>
-                <p>Lunes a Viernes 2:00 PM - 4:00 PM</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="noche" name="horario" value="noche" />
-              <label for="noche">
-                <strong>Noche</strong>
-                <p>Lunes a Viernes 7:00 PM - 9:00 PM</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="fines_manana" name="horario" value="fines_manana" />
-              <label for="fines_manana">
-                <strong>Fines de Semana</strong>
-                <p>Jornada Mañana — Sábado 8:00 AM - 12:00 PM</p>
-              </label>
-            </div>
-
-            <div>
-              <input type="radio" id="fines_tarde" name="horario" value="fines_tarde" />
-              <label for="fines_tarde">
-                <strong>Fines de Semana</strong>
-                <p>Jornada Tarde — Sábado 2:00 PM - 6:00 PM</p>
-              </label>
-            </div>
-
-          </fieldset>
-
-        </div>
-
+      <div class="nav-auth" id="nav-auth">
+        <a href="../auth/login.html" class="btn-login">Log In</a>
+        <a href="../auth/registro.html" class="btn-signup">Sign Up</a>
       </div>
 
-      <!-- Botón continuar -->
-      <div>
-        <button type="submit">Continuar</button>
+      <button class="btn-hamburguesa" id="btn-menu" aria-label="Abrir menú">&#9776;</button>
+
+    </nav>
+  </header>
+
+  <!-- ===== HERO ADMISIONES ===== -->
+  <section class="hero-admisiones" id="inicio-admisiones">
+    <div class="hero-admisiones-inner">
+      <span class="etiqueta">Admisiones abiertas</span>
+      <h1>Proceso de Admisión</h1>
+      <p>Da el primer paso hacia el dominio del inglés. Elige tu perfil, selecciona tu nivel y comienza tu inscripción hoy mismo.</p>
+      <div class="hero-botones">
+        <a href="../auth/registro.html" class="btn-primario">Comenzar Registro</a>
+        <a href="niveles.html" class="btn-secundario">Ver Niveles</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PASOS DEL PROCESO ===== -->
+  <section class="pasos" id="pasos">
+    <h2>¿Cómo funciona?</h2>
+    <p class="subtitulo-pasos">Cuatro pasos sencillos para formar parte de la comunidad American Land</p>
+
+    <div class="grid-pasos">
+
+      <div class="paso-item animar-entrada">
+        <span class="paso-numero">1</span>
+        <h3>Elige tu perfil</h3>
+        <p>Selecciona si eres estudiante nuevo, actual o representas a una empresa</p>
       </div>
 
-    </form>
+      <div class="paso-item animar-entrada">
+        <span class="paso-numero">2</span>
+        <h3>Selecciona tu nivel</h3>
+        <p>Ubícate desde A1 hasta C2 según tu conocimiento previo del idioma</p>
+      </div>
 
-  </main>
+      <div class="paso-item animar-entrada">
+        <span class="paso-numero">3</span>
+        <h3>Completa tus datos</h3>
+        <p>Llena el formulario de registro con tu información personal</p>
+      </div>
+
+      <div class="paso-item animar-entrada">
+        <span class="paso-numero">4</span>
+        <h3>Confirma tu cupo</h3>
+        <p>Realiza el pago de inscripción y recibe la confirmación de tu clase</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SELECCIÓN DE PERFIL ===== -->
+  <section class="selector-perfil" id="selector-perfil">
+    <h2>¿Qué tipo de estudiante eres?</h2>
+    <p class="subtitulo-pasos">Selecciona una opción para continuar con tu proceso de admisión</p>
+
+    <div class="grid-perfiles">
+
+      <button class="card-perfil animar-entrada" data-perfil="nuevo" type="button">
+        <span class="icono">🌱</span>
+        <h3>Nuevo Estudiante</h3>
+        <p>Primera vez aprendiendo inglés con nosotros</p>
+      </button>
+
+      <button class="card-perfil animar-entrada" data-perfil="actual" type="button">
+        <span class="icono">📈</span>
+        <h3>Estudiante Actual</h3>
+        <p>Ya estudias con nosotros y quieres subir de nivel</p>
+      </button>
+
+      <button class="card-perfil animar-entrada" data-perfil="empresa" type="button">
+        <span class="icono">🏢</span>
+        <h3>Empresarial / Corporativo</h3>
+        <p>Buscas capacitación en inglés para tu equipo de trabajo</p>
+      </button>
+
+    </div>
+
+    <div class="continuar-wrap">
+      <button class="btn-primario" id="btn-continuar" disabled>Continuar</button>
+      <p class="ayuda-seleccion" id="ayuda-seleccion">Selecciona un perfil para continuar</p>
+    </div>
+  </section>
+
+  <!-- ===== REQUISITOS ===== -->
+  <section class="requisitos" id="requisitos">
+    <div class="requisitos-inner">
+      <h2>Requisitos de Inscripción</h2>
+      <ul class="lista-requisitos">
+        <li><span class="check">✓</span> Documento de identidad vigente</li>
+        <li><span class="check">✓</span> Fotografía tamaño documento</li>
+        <li><span class="check">✓</span> Formulario de inscripción diligenciado</li>
+        <li><span class="check">✓</span> Correo electrónico y número de contacto activos</li>
+        <li><span class="check">✓</span> Pago de la matrícula correspondiente al nivel</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== CTA FINAL ===== -->
+  <section class="cta-final">
+    <h2>¿Tienes preguntas sobre el proceso?</h2>
+    <p>Nuestro equipo de admisiones está listo para ayudarte a encontrar el nivel ideal para ti.</p>
+    <a href="../index.html#contacto" class="btn-secundario">Contáctanos</a>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer id="contacto">
+    <div class="footer-grid">
+
+      <div class="footer-col">
+        <h4>Instituto American Land</h4>
+        <p>Aprende inglés con los mejores profesores</p>
+        <div class="footer-redes">
+          <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Enlaces Rápidos</h4>
+        <ul>
+          <li><a href="niveles.html">Niveles</a></li>
+          <li><a href="seleccion.html">Admisiones</a></li>
+          <li><a href="estudiantes.html">Estudiantes</a></li>
+          <li><a href="../index.html#contacto">Contacto</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="mailto:ventasymarketing.al@gmail.com">ventasymarketing.al@gmail.com</a></li>
+          <li><a href="tel:+573138132388">3138132388</a></li>
+          <li>Calle 3 # 1-45 barrio Quinche</li>
+          <li>Pitalito, Huila, Colombia</li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#privacidad">Política de Privacidad</a></li>
+          <li><a href="#accesibilidad">Declaración de Accesibilidad</a></li>
+          <li><a href="#terminos">Términos y Condiciones</a></li>
+          <li><a href="#reembolso">Política de Reembolso</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-copy">
+      <p>&copy; 2011 Instituto American Land. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- JS compartido del sitio (menú móvil, scroll, animaciones) -->
+  <script src="../assets/js/index.js"></script>
+  <!-- JS propio de esta página -->
+  <script src="../assets/js/seleccion.js"></script>
 
 </body>
 </html>

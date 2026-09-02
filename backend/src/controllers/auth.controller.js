@@ -5,7 +5,7 @@ require('dotenv').config();
 
 async function registro(req, res) {
   try {
-    const { nombre_completo, correo, contrasena, rol, datosPerfil } = req.body;
+        const { nombre_completo, correo, contrasena, rol, telefono, fecha_nacimiento, pais, ciudad, datosPerfil } = req.body;
 
     if (!nombre_completo || !correo || !contrasena || !rol) {
       return res.status(400).json({ mensaje: 'Nombre, correo, contraseña y rol son obligatorios.' });
@@ -36,14 +36,18 @@ async function registro(req, res) {
 
     const contrasena_hash = await bcrypt.hash(contrasena, 10);
 
-    const resultadoUsuario = await pool.request()
+        const resultadoUsuario = await pool.request()
       .input('rol_id', sql.Int, id_rol)
       .input('nombre_completo', sql.VarChar, nombre_completo)
       .input('correo', sql.VarChar, correo)
       .input('contrasena_hash', sql.VarChar, contrasena_hash)
-      .query(`INSERT INTO Usuarios (rol_id, nombre_completo, correo, contrasena_hash)
+      .input('telefono', sql.VarChar, telefono || null)
+      .input('fecha_nacimiento', sql.Date, fecha_nacimiento || null)
+      .input('pais', sql.VarChar, pais || null)
+      .input('ciudad', sql.VarChar, ciudad || null)
+      .query(`INSERT INTO Usuarios (rol_id, nombre_completo, correo, contrasena_hash, telefono, fecha_nacimiento, pais, ciudad)
               OUTPUT INSERTED.id
-              VALUES (@rol_id, @nombre_completo, @correo, @contrasena_hash)`);
+              VALUES (@rol_id, @nombre_completo, @correo, @contrasena_hash, @telefono, @fecha_nacimiento, @pais, @ciudad)`);
 
     const nuevoUsuarioId = resultadoUsuario.recordset[0].id;
 

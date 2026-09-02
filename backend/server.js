@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const { getPool } = require('./src/config/db');
@@ -11,7 +12,11 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 
-app.get('/', async (req, res) => {
+// Sirve el frontend (HTML, CSS, JS) desde la carpeta raíz del proyecto
+app.use(express.static(path.join(__dirname, '..')));
+
+// Mueve el "health check" de la BD a otra ruta, no a la raíz
+app.get('/api/status', async (req, res) => {
   try {
     const pool = await getPool();
     const resultado = await pool.request().query('SELECT COUNT(*) AS total FROM Usuarios');
