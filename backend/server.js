@@ -5,12 +5,16 @@ require('dotenv').config();
 
 const { getPool } = require('./src/config/db');
 const authRoutes = require('./src/routes/auth.routes');
+const alumnosRoutes = require('./src/routes/alumnos.routes');   
+const adminRoutes = require('./src/routes/admin.routes');    // ← NUEVO
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/alumnos', alumnosRoutes);                          
+app.use('/api/admin', adminRoutes);                              // ← NUEVO
 
 // Sirve el frontend (HTML, CSS, JS) desde la carpeta raíz del proyecto
 app.use(express.static(path.join(__dirname, '..')));
@@ -28,6 +32,8 @@ app.get('/api/status', async (req, res) => {
     res.status(500).json({ mensaje: 'Error al conectar con la base de datos', error: err.message });
   }
 });
+
+const { verificarToken, permitirRoles } = require('./src/middleware/auth.middleware');
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
