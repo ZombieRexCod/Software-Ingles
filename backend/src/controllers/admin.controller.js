@@ -172,8 +172,8 @@ async function obtenerMatriculas(req, res) {
               JOIN Estudiantes e ON m.estudiante_id = e.id
               JOIN Usuarios ue ON e.usuario_id = ue.id
               JOIN Salones s ON m.salon_id = s.id
-              JOIN Secretarias sec ON m.secretaria_id = sec.id
-              JOIN Usuarios us ON sec.usuario_id = us.id
+              LEFT JOIN Secretarias sec ON m.secretaria_id = sec.id
+              LEFT JOIN Usuarios us ON sec.usuario_id = us.id
               ORDER BY m.fecha_matricula DESC`);
 
     res.json({ matriculas: result.recordset });

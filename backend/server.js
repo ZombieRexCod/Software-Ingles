@@ -6,7 +6,9 @@ require('dotenv').config();
 const { getPool } = require('./src/config/db');
 const authRoutes = require('./src/routes/auth.routes');
 const alumnosRoutes = require('./src/routes/alumnos.routes');   
-const adminRoutes = require('./src/routes/admin.routes');    // ← NUEVO
+const adminRoutes = require('./src/routes/admin.routes');
+const docentesRoutes = require('./src/routes/docentes.routes'); 
+const admisionesRoutes = require('./src/routes/admisiones.routes');  // ← NUEVO
 
 const app = express();
 
@@ -14,7 +16,9 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/alumnos', alumnosRoutes);                          
-app.use('/api/admin', adminRoutes);                              // ← NUEVO
+app.use('/api/admin', adminRoutes);
+app.use('/api/docentes', docentesRoutes);
+app.use('/api/admisiones', admisionesRoutes);  // ← NUEVO
 
 // Sirve el frontend (HTML, CSS, JS) desde la carpeta raíz del proyecto
 app.use(express.static(path.join(__dirname, '..')));
