@@ -45,7 +45,7 @@
         <ul>
           <li class="clase-item activa">
             <span class="clase-dot"></span>
-            <a href="salon_virtual.html">Salón Canada</a>
+            <a href="salon_virtual.html">Cargando...</a>
           </li>
         </ul>
       </section>
@@ -68,7 +68,7 @@
       <section class="encabezado-pagina">
         <div>
           <h1>Salón Virtual</h1>
-          <p>L-M-M-J &nbsp;&#183;&nbsp; 8:00AM - 12:00PM</p>
+          <p id="texto-horario"></p>
         </div>
       </section>
 
@@ -76,10 +76,9 @@
       <section class="tarjeta-salon">
         <div class="salon-header">
           <div class="salon-titulo">
-            <h2>Salón Canada</h2>
-            <span class="salon-flag">&#127464;&#127462;</span>
+            <h2 id="salon-titulo">Cargando...</h2>
           </div>
-          <span class="salon-badge">En curso</span>
+          <span class="salon-badge" id="salon-estado"></span>
         </div>
 
         <div class="salon-detalles">
@@ -87,28 +86,28 @@
             <span class="detalle-icono">&#128197;</span>
             <div>
               <p class="detalle-label">Horario</p>
-              <p class="detalle-valor">L-M-M-J &nbsp; 8:00AM - 12:00PM</p>
+              <p class="detalle-valor" id="salon-horario"></p>
             </div>
           </div>
           <div class="salon-detalle-item">
             <span class="detalle-icono">&#128100;</span>
             <div>
               <p class="detalle-label">Profesor</p>
-              <p class="detalle-valor">Luis Perez</p>
+              <p class="detalle-valor" id="salon-profesor"></p>
             </div>
           </div>
           <div class="salon-detalle-item">
             <span class="detalle-icono">&#128336;</span>
             <div>
-              <p class="detalle-label">Horas Completadas</p>
-              <p class="detalle-valor">20 / 40 hrs</p>
+              <p class="detalle-label">Alumnos</p>
+              <p class="detalle-valor" id="salon-alumnos"></p>
             </div>
           </div>
           <div class="salon-detalle-item">
             <span class="detalle-icono">&#128218;</span>
             <div>
               <p class="detalle-label">Nivel</p>
-              <p class="detalle-valor">Beginner (A1)</p>
+              <p class="detalle-valor" id="salon-nivel"></p>
             </div>
           </div>
         </div>
@@ -120,7 +119,7 @@
         <!-- Etiqueta -->
         <div class="vista-header">
           <h2>Vista del Salón</h2>
-          <span class="alumnos-count">&#128100; 10 alumnos conectados</span>
+          <span class="alumnos-count" id="alumnos-count"></span>
         </div>
 
         <!-- Aula -->
@@ -136,69 +135,7 @@
           </div>
 
           <!-- Grid de estudiantes -->
-          <div class="grid-estudiantes">
-
-            <div class="estudiante-card activo-yo">
-              <div class="est-avatar est-yo">TÚ</div>
-              <p class="est-nombre" id="est-nombre-yo">Tú</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">MA</div>
-              <p class="est-nombre">María A.</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">JR</div>
-              <p class="est-nombre">Juan R.</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">SG</div>
-              <p class="est-nombre">Sofía G.</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">DM</div>
-              <p class="est-nombre">David M.</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">LT</div>
-              <p class="est-nombre">Laura T.</p>
-              <span class="est-estado est-desconectado">&#9679; Ausente</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">CO</div>
-              <p class="est-nombre">Carlos O.</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">VR</div>
-              <p class="est-nombre">Valentina R.</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">AM</div>
-              <p class="est-nombre">Andrés M.</p>
-              <span class="est-estado est-desconectado">&#9679; Ausente</span>
-            </div>
-
-            <div class="estudiante-card">
-              <div class="est-avatar">PL</div>
-              <p class="est-nombre">Paula L.</p>
-              <span class="est-estado est-conectado">&#9679; Conectado</span>
-            </div>
-
-          </div>
+          <div class="grid-estudiantes" id="grid-estudiantes"></div>
 
         </div>
 

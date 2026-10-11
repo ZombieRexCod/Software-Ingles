@@ -1,23 +1,26 @@
 /* ============================================================
-   docentes_admin.js — Instituto American Land
-   Mismo patrón que inicio_admin.js
+   docentes_admin.js
+   Instituto American Land
+   Ubicación: assets/js/docentes_admin.js
 ============================================================ */
 
-// ── 1. NOMBRE Y AVATAR DESDE sessionStorage ─────────────────
+const API = window.location.origin + '/api';
+
+// ── 1. VERIFICAR SESIÓN ─────────────────────────────────────
+const token = sessionStorage.getItem('token');
+const rol   = sessionStorage.getItem('rol');
+const sesionValida = !!token && rol === 'admin';
+
+if (!sesionValida) {
+  window.location.href = '../auth/login.html';
+}
+
+// ── 2. NOMBRE Y AVATAR ──────────────────────────────────────
 const nombre    = sessionStorage.getItem('nombre') || 'Administrador';
 const navNombre = document.getElementById('nav-nombre');
 const navAvatar = document.getElementById('nav-avatar');
 if (navNombre) navNombre.textContent = nombre;
 if (navAvatar) navAvatar.textContent = nombre.charAt(0).toUpperCase();
-
-// ── 2. FECHA ACTUAL ─────────────────────────────────────────
-const textFecha = document.getElementById('texto-fecha');
-if (textFecha) {
-  const hoy     = new Date();
-  const opciones = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-  const str      = hoy.toLocaleDateString('es-CO', opciones);
-  textFecha.textContent = str.charAt(0).toUpperCase() + str.slice(1);
-}
 
 // ── 3. CERRAR SESIÓN ────────────────────────────────────────
 document.querySelector('.btn-cerrar').addEventListener('click', function (e) {
@@ -26,381 +29,615 @@ document.querySelector('.btn-cerrar').addEventListener('click', function (e) {
   window.location.href = '../auth/login.html';
 });
 
-// ── 4. NOTIFICACIÓN ─────────────────────────────────────────
-const btnNotif = document.getElementById('btn-notif');
-if (btnNotif) btnNotif.addEventListener('click', function () { mostrarToast('No tienes notificaciones nuevas'); });
+// ── 4. HELPER PARA LA API (GET, POST, PUT) ──────────────────
+// Devuelve { ok, datos } o null si el token venció.
+async function apiFetch(ruta, opciones) {
+  const config = opciones || {};
+  const headers = { 'Authorization': 'Bearer ' + token };
+  if (config.body) headers['Content-Type'] = 'application/json';
 
-// ── 5. SIDEBAR: acciones rápidas ────────────────────────────
-const rutasSidebar = {
-  'sb-nuevo-docente': 'docentes.html',
-  'sb-nuevo-alumno':  'alumnos.html',
-  'sb-nuevo-salon':   'salones.html',
-};
-Object.keys(rutasSidebar).forEach(function (id) {
-  var btn = document.getElementById(id);
-  if (btn) btn.addEventListener('click', function () {
-    if (id === 'sb-nuevo-docente') { abrirModalNuevo(); }
-    else { window.location.href = rutasSidebar[id]; }
+  const respuesta = await fetch(API + ruta, {
+    method: config.method || 'GET',
+    headers: headers,
+    body: config.body ? JSON.stringify(config.body) : undefined
   });
-});
 
-// ── 6. CONTADORES ANIMADOS ───────────────────────────────────
-var datosStat = {
-  'stat-total':       { fin: 5,  dur: 900 },
-  'stat-salones-asig':{ fin: 4,  dur: 800 },
-  'stat-alumnos-asig':{ fin: 39, dur: 1200 },
-  'stat-horas':       { fin: 20, dur: 1000 },
-};
+  if (respuesta.status === 401) {
+    sessionStorage.clear();
+    window.location.href = '../auth/login.html';
+    return null;
+  }
 
-function animarContador(el, fin, dur) {
-  var pasos = 60;
-  var intervalo = dur / pasos;
-  var paso = 0;
-  var timer = setInterval(function () {
-    paso++;
-    var progreso = paso / pasos;
-    el.textContent = Math.round(fin * (1 - Math.pow(1 - progreso, 3)));
-    if (paso >= pasos) { clearInterval(timer); el.textContent = fin; }
-  }, intervalo);
+  let datos = null;
+  try { datos = await respuesta.json(); } catch (err) { /* sin cuerpo JSON */ }
+  return { ok: respuesta.ok, datos: datos };
 }
 
-var gridStats = document.querySelector('.grid-stats');
-if (gridStats) {
-  var obsStats = new IntersectionObserver(function (entradas) {
-    entradas.forEach(function (e) {
-      if (e.isIntersecting) {
-        Object.keys(datosStat).forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el) animarContador(el, datosStat[id].fin, datosStat[id].dur);
-        });
-        obsStats.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.3 });
-  obsStats.observe(gridStats);
+// ── 5. UTILIDADES ───────────────────────────────────────────
+function crear(tag, clase, texto) {
+  const el = document.createElement(tag);
+  if (clase) el.className = clase;
+  if (texto !== undefined) el.textContent = texto;
+  return el;
 }
 
-// ── 7. ANIMACIÓN FILAS ───────────────────────────────────────
-var filas = document.querySelectorAll('.fila-docente');
-var obsFilas = new IntersectionObserver(function (entradas) {
-  entradas.forEach(function (e) {
-    if (e.isIntersecting) {
-      e.target.style.opacity   = '1';
-      e.target.style.transform = 'translateY(0)';
-      obsFilas.unobserve(e.target);
+function porId(id) {
+  return document.getElementById(id);
+}
+
+function setTexto(id, texto) {
+  const el = porId(id);
+  if (el) el.textContent = texto;
+}
+
+function plural(n, singular, pluralTexto) {
+  return n + ' ' + (n === 1 ? singular : pluralTexto);
+}
+
+function mostrarAlerta(tipo, texto) {
+  const alerta = porId('alerta');
+  alerta.textContent = texto;
+  alerta.className = 'alerta ' + tipo + ' visible';
+  alerta.style.display = 'block';
+}
+
+function pintarFecha() {
+  const texto = new Date().toLocaleDateString('es-CO', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  setTexto('texto-fecha', texto.charAt(0).toUpperCase() + texto.slice(1));
+}
+
+// "MR" a partir de "Mario Ramírez"
+function iniciales(texto) {
+  const palabras = String(texto || '?').trim().split(/\s+/);
+  const a = palabras[0] ? palabras[0].charAt(0) : '';
+  const b = palabras[1] ? palabras[1].charAt(0) : '';
+  return (a + b).toUpperCase();
+}
+
+// Las horas TIME llegan en UTC: "1970-01-01T18:00:00.000Z" -> "18:00"
+function fmtHora(valor) {
+  if (!valor) return '';
+  const d = new Date(valor);
+  return d.getUTCHours() + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+}
+
+function fmtDias(dias) {
+  return dias ? String(dias).split(',').join(', ') : '';
+}
+
+// Horas por semana de un salón = número de días x duración de la clase
+function horasSemana(salon) {
+  if (!salon.dias_semana || !salon.hora_inicio || !salon.hora_fin) return 0;
+  const dias = String(salon.dias_semana).split(',').filter(function (d) { return d.trim() !== ''; }).length;
+  const duracion = (new Date(salon.hora_fin) - new Date(salon.hora_inicio)) / 3600000;
+  return dias * (duracion > 0 ? duracion : 0);
+}
+
+function fmtNumero(n) {
+  return String(Math.round(n * 10) / 10);
+}
+
+// Colores de tus clases CSS, repartidos entre los salones
+const COLORES_SALON = ['rojo-tag', 'azul-tag', 'morado-tag', 'amarillo-tag'];
+const GRADIENTES = [
+  'linear-gradient(135deg,#4B0082,#6A0DAD)',
+  'linear-gradient(135deg,#2980B9,#5dade2)',
+  'linear-gradient(135deg,#27AE60,#58d68d)',
+  'linear-gradient(135deg,#F39C12,#f8c471)'
+];
+const GRADIENTE_INACTIVO = 'linear-gradient(135deg,#888,#aaa)';
+
+// ── 6. ESTADO DE LA PÁGINA ──────────────────────────────────
+let docentes = [];     // usuarios con rol "docente"
+let salones = [];      // GET /admin/salones
+let matriculas = [];   // GET /admin/matriculas
+let docenteADesactivar = null;
+let docenteEditando = null;   // null = nuevo; objeto = editar
+
+// ── 7. CARGA DE DATOS ───────────────────────────────────────
+async function cargarUsuarios() {
+  const res = await apiFetch('/admin/usuarios');
+  if (res && res.ok && res.datos && Array.isArray(res.datos.usuarios)) {
+    docentes = res.datos.usuarios.filter(function (u) { return u.rol === 'docente'; });
+    await unirPerfiles();
+    return true;
+  }
+  mostrarAlerta('error', (res && res.datos && res.datos.mensaje) || 'No se pudieron cargar los docentes.');
+  return false;
+}
+
+// GET /admin/docentes trae Docentes.id y la especialidad (se une por usuario_id).
+// El estado activo/inactivo sigue saliendo de /admin/usuarios, que es el que cambia el PUT.
+async function unirPerfiles() {
+  const perfiles = {};
+  try {
+    const res = await apiFetch('/admin/docentes');
+    if (res && res.ok && res.datos && Array.isArray(res.datos.docentes)) {
+      res.datos.docentes.forEach(function (p) { perfiles[p.usuario_id] = p; });
     }
+  } catch (err) {
+    console.error('Error al cargar los perfiles de docentes:', err);
+  }
+  docentes.forEach(function (d) {
+    const p = perfiles[d.id];
+    d.docente_id = p ? p.id : null;
+    d.especialidad = p ? p.especialidad : null;
   });
-}, { threshold: 0.05 });
+}
 
-filas.forEach(function (fila, i) {
-  fila.style.opacity    = '0';
-  fila.style.transform  = 'translateY(10px)';
-  fila.style.transition = 'opacity 0.3s ease ' + (i * 0.07) + 's, transform 0.3s ease ' + (i * 0.07) + 's';
-  obsFilas.observe(fila);
-});
+async function cargarSalones() {
+  try {
+    const res = await apiFetch('/admin/salones');
+    if (res && res.ok && res.datos && Array.isArray(res.datos.salones)) {
+      salones = res.datos.salones;
+    }
+  } catch (err) {
+    console.error('Error al cargar los salones:', err);
+  }
+}
 
-// ══════════════════════════════════════════
-// FILTROS Y BÚSQUEDA
-// ══════════════════════════════════════════
-var inputBusqueda = document.getElementById('input-busqueda');
-var filtroEstado  = document.getElementById('filtro-estado');
-var filtroSalon   = document.getElementById('filtro-salon');
-var btnLimpiar    = document.getElementById('btn-limpiar');
-var sinResultados = document.getElementById('sin-resultados');
-var badgeTotal    = document.getElementById('badge-total');
+async function cargarMatriculas() {
+  try {
+    const res = await apiFetch('/admin/matriculas');
+    if (res && res.ok && res.datos && Array.isArray(res.datos.matriculas)) {
+      matriculas = res.datos.matriculas;
+    }
+  } catch (err) {
+    console.error('Error al cargar las matrículas:', err);
+  }
+}
+
+// ── 8. DATOS DERIVADOS ──────────────────────────────────────
+// Se cruza por Docentes.id cuando /admin/salones trae docente_id;
+// si todavía no lo trae, se usa el nombre como respaldo.
+function salonesDe(docente) {
+  return salones.filter(function (s) {
+    if (s.docente_id !== undefined && docente.docente_id !== null) {
+      return s.docente_id === docente.docente_id;
+    }
+    return s.docente === docente.nombre_completo;
+  });
+}
+
+// Alumnos con matrícula activa en un salón (se busca por nombre + año)
+function alumnosDe(salon) {
+  return matriculas.filter(function (m) {
+    return m.salon === salon.nombre && m.anno === salon.anno && m.estado === 'activa';
+  }).length;
+}
+
+function colorDeSalon(nombreSalon) {
+  const nombres = [];
+  salones.forEach(function (s) {
+    if (nombres.indexOf(s.nombre) === -1) nombres.push(s.nombre);
+  });
+  return COLORES_SALON[nombres.indexOf(nombreSalon) % COLORES_SALON.length];
+}
+
+// ── 9. TARJETAS Y FILTROS ───────────────────────────────────
+function pintarStats() {
+  let totalSalones = 0;
+  let totalAlumnos = 0;
+  let totalHoras = 0;
+
+  docentes.forEach(function (d) {
+    salonesDe(d).forEach(function (s) {
+      totalSalones++;
+      totalAlumnos += alumnosDe(s);
+      totalHoras += horasSemana(s);
+    });
+  });
+
+  const activos = docentes.filter(function (d) { return d.activo; }).length;
+  setTexto('stat-total', docentes.length);
+  setTexto('delta-total', '\u21E7 ' + plural(activos, 'activo', 'activos'));
+  setTexto('stat-salones-asig', totalSalones);
+  setTexto('stat-alumnos-asig', totalAlumnos);
+  setTexto('stat-horas', fmtNumero(totalHoras));
+}
+
+function llenarFiltroSalon() {
+  const sel = porId('filtro-salon');
+  const nombres = [];
+  salones.forEach(function (s) {
+    if (nombres.indexOf(s.nombre) === -1) nombres.push(s.nombre);
+  });
+  nombres.forEach(function (n) {
+    const op = crear('option', '', n);
+    op.value = n;
+    sel.appendChild(op);
+  });
+}
 
 function filtrar() {
-  var texto  = inputBusqueda.value.toLowerCase().trim();
-  var estado = filtroEstado.value;
-  var salon  = filtroSalon.value;
-  var visibles = 0;
+  const texto = porId('input-busqueda').value.trim().toLowerCase();
+  const estado = porId('filtro-estado').value;
+  const salon = porId('filtro-salon').value;
 
-  filas.forEach(function (fila) {
-    var nombre     = fila.querySelector('.docente-nombre').textContent.toLowerCase();
-    var correo     = fila.querySelector('.docente-correo').textContent.toLowerCase();
-    var especial   = fila.querySelector('.tag-especialidad') ? fila.querySelector('.tag-especialidad').textContent.toLowerCase() : '';
-    var filaEstado = fila.dataset.estado || '';
-    var filaSalon  = fila.dataset.salon  || '';
-
-    var textoOk  = !texto  || nombre.includes(texto) || correo.includes(texto) || especial.includes(texto);
-    var estadoOk = !estado || filaEstado === estado;
-    var salonOk  = !salon  || filaSalon  === salon;
-
-    var visible = textoOk && estadoOk && salonOk;
-    fila.style.display = visible ? '' : 'none';
-    if (visible) visibles++;
-  });
-
-  sinResultados.style.display = visibles === 0 ? 'block' : 'none';
-  badgeTotal.textContent = visibles + (visibles === 1 ? ' docente' : ' docentes');
-}
-
-inputBusqueda.addEventListener('input', filtrar);
-filtroEstado.addEventListener('change', filtrar);
-filtroSalon.addEventListener('change', filtrar);
-
-btnLimpiar.addEventListener('click', function () {
-  inputBusqueda.value = '';
-  filtroEstado.value  = '';
-  filtroSalon.value   = '';
-  filtrar();
-});
-
-// ══════════════════════════════════════════
-// MODAL AGREGAR / EDITAR
-// ══════════════════════════════════════════
-var modalOverlay  = document.getElementById('modal-overlay');
-var modalTitulo   = document.getElementById('modal-titulo');
-var formDocente   = document.getElementById('form-docente');
-var docenteIdEl   = document.getElementById('docente-id');
-var filaEditar    = null;
-
-function abrirModalNuevo() {
-  modalTitulo.textContent = 'Nuevo Docente';
-  formDocente.reset();
-  docenteIdEl.value = '';
-  filaEditar = null;
-  limpiarErrores();
-  modalOverlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-
-function abrirModalEditar(fila) {
-  filaEditar = fila;
-  modalTitulo.textContent = 'Editar Docente';
-  docenteIdEl.value = fila.querySelector('.btn-editar').dataset.id;
-
-  var nombre   = fila.querySelector('.docente-nombre').textContent.replace('Prof. ', '');
-  var correo   = fila.querySelector('.docente-correo').textContent;
-  var especial = fila.querySelector('.tag-especialidad') ? fila.querySelector('.tag-especialidad').textContent : '';
-  var estado   = fila.dataset.estado || 'activo';
-  var salon    = fila.dataset.salon  || '';
-  var horario  = fila.querySelector('.horario-texto') ? fila.querySelector('.horario-texto').textContent : '';
-
-  document.getElementById('doc-nombre').value       = nombre;
-  document.getElementById('doc-correo').value       = correo;
-  document.getElementById('doc-especialidad').value = especial;
-  document.getElementById('doc-estado').value       = estado;
-  document.getElementById('doc-salon').value        = salon;
-  document.getElementById('doc-horario').value      = horario !== '—' ? horario : '';
-  document.getElementById('doc-telefono').value     = '';
-  document.getElementById('doc-titulo').value       = '';
-  document.getElementById('doc-observaciones').value = '';
-
-  limpiarErrores();
-  modalOverlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-
-function cerrarModal() {
-  modalOverlay.style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-document.getElementById('btn-nuevo-docente').addEventListener('click', abrirModalNuevo);
-document.getElementById('btn-cerrar-modal').addEventListener('click', cerrarModal);
-document.getElementById('btn-cancelar-modal').addEventListener('click', cerrarModal);
-
-modalOverlay.addEventListener('click', function (e) {
-  if (e.target === modalOverlay) cerrarModal();
-});
-
-// ── Validación y guardado ────────────────────────────────────
-function limpiarErrores() {
-  ['err-nombre','err-correo','err-especialidad'].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = '';
-  });
-  ['doc-nombre','doc-correo','doc-especialidad'].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.classList.remove('invalido');
-  });
-}
-
-formDocente.addEventListener('submit', function (e) {
-  e.preventDefault();
-  limpiarErrores();
-
-  var nombre   = document.getElementById('doc-nombre').value.trim();
-  var correo   = document.getElementById('doc-correo').value.trim();
-  var especial = document.getElementById('doc-especialidad').value.trim();
-  var reEmail  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  var ok       = true;
-
-  if (nombre.length < 2) {
-    document.getElementById('err-nombre').textContent = 'Ingresa el nombre del docente.';
-    document.getElementById('doc-nombre').classList.add('invalido');
-    ok = false;
-  }
-  if (!reEmail.test(correo)) {
-    document.getElementById('err-correo').textContent = 'Ingresa un correo válido.';
-    document.getElementById('doc-correo').classList.add('invalido');
-    ok = false;
-  }
-  if (especial.length < 2) {
-    document.getElementById('err-especialidad').textContent = 'Ingresa la especialidad.';
-    document.getElementById('doc-especialidad').classList.add('invalido');
-    ok = false;
-  }
-  if (!ok) return;
-
-  var salon   = document.getElementById('doc-salon').value;
-  var horario = document.getElementById('doc-horario').value.trim() || '—';
-  var estado  = document.getElementById('doc-estado').value;
-  var id      = docenteIdEl.value;
-
-  if (filaEditar) {
-    // Actualizar fila existente
-    filaEditar.querySelector('.docente-nombre').textContent = 'Prof. ' + nombre;
-    filaEditar.querySelector('.docente-correo').textContent = correo;
-    if (filaEditar.querySelector('.tag-especialidad')) {
-      filaEditar.querySelector('.tag-especialidad').textContent = especial;
+  return docentes.filter(function (d) {
+    if (estado === 'activo' && !d.activo) return false;
+    if (estado === 'inactivo' && d.activo) return false;
+    if (salon) {
+      const tiene = salonesDe(d).some(function (s) { return s.nombre === salon; });
+      if (!tiene) return false;
     }
-    var badgeEl = filaEditar.querySelector('.badge-estado');
-    badgeEl.className = 'badge-estado ' + estado;
-    badgeEl.textContent = estado.charAt(0).toUpperCase() + estado.slice(1);
-    filaEditar.dataset.estado = estado;
-    filaEditar.dataset.salon  = salon;
-    if (filaEditar.querySelector('.horario-texto')) {
-      filaEditar.querySelector('.horario-texto').textContent = horario;
+    if (texto) {
+      const paja = (String(d.nombre_completo) + ' ' + String(d.correo) + ' ' + String(d.especialidad || '')).toLowerCase();
+      if (paja.indexOf(texto) === -1) return false;
     }
-    mostrarToast('Docente actualizado correctamente');
+    return true;
+  });
+}
+
+// ── 10. TABLA ───────────────────────────────────────────────
+// Cada salón ocupa una línea de la misma altura en las columnas Salón y Horario
+function lineaApilada(elemento) {
+  elemento.style.minHeight = '26px';
+  elemento.style.display = 'flex';
+  elemento.style.alignItems = 'center';
+  return elemento;
+}
+
+function contenedorApilado() {
+  const c = crear('div');
+  c.style.display = 'flex';
+  c.style.flexDirection = 'column';
+  c.style.gap = '4px';
+  c.style.alignItems = 'flex-start';
+  return c;
+}
+
+function crearBotonAccion(d) {
+  const acciones = crear('div', 'acciones-fila');
+
+  const btnEditar = crear('button', 'btn-editar', '\u270E');
+  btnEditar.title = 'Editar';
+  btnEditar.dataset.id = d.id;
+  btnEditar.addEventListener('click', function () { abrirModalDocente(d); });
+  acciones.appendChild(btnEditar);
+
+  if (d.activo) {
+    const btn = crear('button', 'btn-eliminar', '\uD83D\uDDD1');
+    btn.title = 'Desactivar';
+    btn.dataset.id = d.id;
+    btn.addEventListener('click', function () { pedirDesactivar(d); });
+    acciones.appendChild(btn);
   } else {
-    // Agregar nueva fila
-    var initiales = nombre.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
-    var colorMap  = { canada:'135deg,#4B0082,#6A0DAD', 'nueva-zelanda':'135deg,#2980B9,#5dade2', miami:'135deg,#27AE60,#58d68d', londres:'135deg,#F39C12,#f8c471' };
-    var gradiente = salon && colorMap[salon] ? colorMap[salon] : '135deg,#888,#aaa';
-    var salonNombre = { canada:'Salón Canadá','nueva-zelanda':'Salón Nueva Zelanda', miami:'Salón Miami', londres:'Salón Londres' };
-    var salonTagClass = { canada:'rojo-tag','nueva-zelanda':'azul-tag', miami:'morado-tag', londres:'amarillo-tag' };
-    var salonHtml = salon
-      ? '<div class="salon-tag ' + (salonTagClass[salon]||'') + '">&#127968; ' + (salonNombre[salon]||salon) + '</div>'
-      : '<span class="gris-texto">Sin asignar</span>';
+    const btn = crear('button', 'btn-editar', '\u2714');
+    btn.title = 'Activar';
+    btn.dataset.id = d.id;
+    btn.addEventListener('click', function () { cambiarEstado(d, true, btn); });
+    acciones.appendChild(btn);
+  }
+  return acciones;
+}
 
-    var tbody = document.getElementById('tbody-docentes');
-    var tr = document.createElement('tr');
-    tr.className    = 'fila-docente';
-    tr.dataset.estado = estado;
-    tr.dataset.salon  = salon;
+function crearFila(d, indice) {
+  const tr = crear('tr', 'fila-docente');
+  const susSalones = salonesDe(d);
 
-    var newId = Date.now();
-    tr.innerHTML =
-      '<td><div class="docente-info">' +
-        '<div class="avatar-docente" style="background:linear-gradient(' + gradiente + ')">' + initiales + '</div>' +
-        '<div><p class="docente-nombre">Prof. ' + nombre + '</p><p class="docente-correo">' + correo + '</p></div>' +
-      '</div></td>' +
-      '<td><span class="tag-especialidad">' + especial + '</span></td>' +
-      '<td>' + salonHtml + '</td>' +
-      '<td><span class="horario-texto">' + horario + '</span></td>' +
-      '<td><span class="num-alumnos">0</span></td>' +
-      '<td><span class="badge-estado ' + estado + '">' + (estado.charAt(0).toUpperCase()+estado.slice(1)) + '</span></td>' +
-      '<td><div class="acciones-fila">' +
-        '<button class="btn-editar" data-id="' + newId + '" title="Editar">&#9998;</button>' +
-        '<button class="btn-ver" data-id="' + newId + '" title="Ver perfil">&#128065;</button>' +
-        '<button class="btn-eliminar" data-id="' + newId + '" title="Eliminar">&#128465;</button>' +
-      '</div></td>';
+  // Docente
+  const tdDoc = crear('td');
+  const info = crear('div', 'docente-info');
+  const avatar = crear('div', 'avatar-docente', iniciales(d.nombre_completo));
+  avatar.style.background = d.activo ? GRADIENTES[indice % GRADIENTES.length] : GRADIENTE_INACTIVO;
+  info.appendChild(avatar);
+  const textos = crear('div');
+  textos.appendChild(crear('p', 'docente-nombre', d.nombre_completo));
+  textos.appendChild(crear('p', 'docente-correo', d.correo));
+  info.appendChild(textos);
+  tdDoc.appendChild(info);
+  tr.appendChild(tdDoc);
 
-    tbody.appendChild(tr);
-    registrarBotonesAccion(tr);
-    mostrarToast('Docente agregado correctamente');
+  // Especialidad (GET /admin/docentes)
+  const tdEsp = crear('td');
+  if (d.especialidad) {
+    tdEsp.appendChild(crear('span', 'tag-especialidad', d.especialidad));
+  } else {
+    tdEsp.appendChild(crear('span', 'gris-texto', '\u2014'));
+  }
+  tr.appendChild(tdEsp);
+
+  // Salón asignado
+  const tdSalon = crear('td');
+  if (susSalones.length === 0) {
+    tdSalon.appendChild(crear('span', 'gris-texto', 'Sin asignar'));
+  } else {
+    const cont = contenedorApilado();
+    susSalones.forEach(function (s) {
+      const linea = lineaApilada(crear('div'));
+      linea.appendChild(crear('div', 'salon-tag ' + colorDeSalon(s.nombre), '\uD83C\uDFE0 ' + s.nombre));
+      cont.appendChild(linea);
+    });
+    tdSalon.appendChild(cont);
+  }
+  tr.appendChild(tdSalon);
+
+  // Horario
+  const tdHor = crear('td');
+  if (susSalones.length === 0) {
+    tdHor.appendChild(crear('span', 'horario-texto gris-texto', '\u2014'));
+  } else {
+    const cont = contenedorApilado();
+    susSalones.forEach(function (s) {
+      let texto = '\u2014';
+      if (s.dias_semana && s.hora_inicio && s.hora_fin) {
+        texto = fmtDias(s.dias_semana) + ' ' + fmtHora(s.hora_inicio) + '\u2013' + fmtHora(s.hora_fin);
+      }
+      cont.appendChild(lineaApilada(crear('span', 'horario-texto', texto)));
+    });
+    tdHor.appendChild(cont);
+  }
+  tr.appendChild(tdHor);
+
+  // Alumnos (matrículas activas en sus salones)
+  const totalAlumnos = susSalones.reduce(function (suma, s) { return suma + alumnosDe(s); }, 0);
+  const tdAlu = crear('td');
+  tdAlu.appendChild(crear('span', 'num-alumnos' + (susSalones.length === 0 ? ' gris-texto' : ''), String(totalAlumnos)));
+  tr.appendChild(tdAlu);
+
+  // Estado
+  const tdEst = crear('td');
+  tdEst.appendChild(crear('span', 'badge-estado ' + (d.activo ? 'activo' : 'inactivo'), d.activo ? 'Activo' : 'Inactivo'));
+  tr.appendChild(tdEst);
+
+  // Acciones
+  const tdAcc = crear('td');
+  tdAcc.appendChild(crearBotonAccion(d));
+  tr.appendChild(tdAcc);
+
+  return tr;
+}
+
+function pintarTabla() {
+  const tbody = porId('tbody-docentes');
+  tbody.innerHTML = '';
+
+  const lista = filtrar();
+  setTexto('badge-total', plural(lista.length, 'docente', 'docentes'));
+
+  const sinRes = porId('sin-resultados');
+  if (lista.length === 0) {
+    sinRes.querySelector('p').textContent = docentes.length === 0
+      ? 'Todavía no hay docentes registrados'
+      : 'No se encontraron docentes con ese criterio';
+    sinRes.style.display = 'block';
+    return;
+  }
+  sinRes.style.display = 'none';
+
+  lista.forEach(function (d) {
+    tbody.appendChild(crearFila(d, docentes.indexOf(d)));
+  });
+}
+
+// ── 11. ACTIVAR / DESACTIVAR ────────────────────────────────
+function pedirDesactivar(d) {
+  docenteADesactivar = d;
+  setTexto('nombre-a-eliminar', d.nombre_completo);
+  porId('modal-eliminar').style.display = 'flex';
+}
+
+function cerrarModalDesactivar() {
+  porId('modal-eliminar').style.display = 'none';
+  docenteADesactivar = null;
+}
+
+async function cambiarEstado(d, activo, boton) {
+  if (boton) boton.disabled = true;
+
+  try {
+    const res = await apiFetch('/admin/usuarios/' + d.id + '/estado', {
+      method: 'PUT',
+      body: { activo: activo }
+    });
+
+    if (res && res.ok) {
+      await cargarUsuarios();
+      pintarStats();
+      pintarTabla();
+      mostrarAlerta('exito', activo
+        ? d.nombre_completo + ' fue activado.'
+        : d.nombre_completo + ' fue desactivado.');
+      return true;
+    }
+    mostrarAlerta('error', (res && res.datos && res.datos.mensaje) || 'No se pudo cambiar el estado del docente.');
+  } catch (err) {
+    console.error(err);
+    mostrarAlerta('error', 'No se pudo conectar con el servidor.');
   }
 
-  cerrarModal();
-  filtrar();
-});
-
-// ══════════════════════════════════════════
-// MODAL ELIMINAR
-// ══════════════════════════════════════════
-var modalEliminar       = document.getElementById('modal-eliminar');
-var nombreAEliminar     = document.getElementById('nombre-a-eliminar');
-var filaAEliminar       = null;
-
-function abrirModalEliminar(fila) {
-  filaAEliminar = fila;
-  nombreAEliminar.textContent = fila.querySelector('.docente-nombre').textContent;
-  modalEliminar.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
+  if (boton) boton.disabled = false;
+  return false;
 }
 
-function cerrarModalEliminar() {
-  modalEliminar.style.display = 'none';
-  document.body.style.overflow = '';
-  filaAEliminar = null;
+// ── 12. MODAL: NUEVO DOCENTE ────────────────────────────────
+const CAMPOS_MODAL = ['doc-nombre', 'doc-correo', 'doc-contrasena', 'doc-telefono', 'doc-especialidad'];
+const ERRORES_MODAL = ['err-nombre', 'err-correo', 'err-contrasena', 'err-telefono', 'err-especialidad', 'err-general'];
+
+function limpiarErroresModal() {
+  ERRORES_MODAL.forEach(function (id) { setTexto(id, ''); });
+  CAMPOS_MODAL.forEach(function (id) { porId(id).classList.remove('invalido'); });
 }
 
-document.getElementById('btn-cerrar-eliminar').addEventListener('click', cerrarModalEliminar);
-document.getElementById('btn-cancelar-eliminar').addEventListener('click', cerrarModalEliminar);
+function abrirModalDocente(docente) {
+  docenteEditando = docente && docente.id ? docente : null;
+  const editando = !!docenteEditando;
 
-modalEliminar.addEventListener('click', function (e) {
-  if (e.target === modalEliminar) cerrarModalEliminar();
-});
-
-document.getElementById('btn-confirmar-eliminar').addEventListener('click', function () {
-  if (filaAEliminar) {
-    var nombre = filaAEliminar.querySelector('.docente-nombre').textContent;
-    filaAEliminar.remove();
-    cerrarModalEliminar();
-    filtrar();
-    mostrarToast(nombre + ' eliminado', true);
+  CAMPOS_MODAL.forEach(function (id) { porId(id).value = ''; });
+  if (editando) {
+    porId('doc-nombre').value = docente.nombre_completo || '';
+    porId('doc-correo').value = docente.correo || '';
+    porId('doc-telefono').value = docente.telefono || '';
+    porId('doc-especialidad').value = docente.especialidad || '';
   }
-});
-
-// ── Registrar botones de acción en cada fila ─────────────────
-function registrarBotonesAccion(fila) {
-  fila.querySelector('.btn-editar').addEventListener('click', function () {
-    abrirModalEditar(fila);
-  });
-  fila.querySelector('.btn-ver').addEventListener('click', function () {
-    var nombre = fila.querySelector('.docente-nombre').textContent;
-    mostrarToast('Perfil de ' + nombre);
-  });
-  fila.querySelector('.btn-eliminar').addEventListener('click', function () {
-    abrirModalEliminar(fila);
-  });
+  setTexto('modal-titulo', editando ? 'Editar Docente' : 'Nuevo Docente');
+  setTexto('btn-guardar-docente', editando ? 'Guardar Cambios' : 'Guardar Docente');
+  porId('doc-contrasena').placeholder = editando ? 'Vacía = conservar la actual' : 'Mínimo 6 caracteres';
+  porId('doc-contrasena-oblig').style.display = editando ? 'none' : '';
+  porId('ayuda-edicion').style.display = editando ? 'block' : 'none';
+  limpiarErroresModal();
+  porId('btn-guardar-docente').disabled = false;
+  porId('modal-overlay').style.display = 'flex';
+  porId('doc-nombre').focus();
 }
 
-// Registrar en filas existentes
-filas.forEach(function (fila) { registrarBotonesAccion(fila); });
+function cerrarModalDocente() {
+  porId('modal-overlay').style.display = 'none';
+  docenteEditando = null;
+}
 
-// ── ESCAPE para cerrar modales ───────────────────────────────
+function marcarError(idCampo, idError, mensaje) {
+  porId(idCampo).classList.add('invalido');
+  setTexto(idError, mensaje);
+}
+
+async function guardarDocente(e) {
+  e.preventDefault();
+  limpiarErroresModal();
+
+  const nombreCompleto = porId('doc-nombre').value.trim();
+  const correo = porId('doc-correo').value.trim();
+  const contrasena = porId('doc-contrasena').value;
+  const telefono = porId('doc-telefono').value.trim();
+  const especialidad = porId('doc-especialidad').value.trim();
+
+  // Validaciones en el navegador (el backend vuelve a validar)
+  let valido = true;
+  if (!nombreCompleto) {
+    marcarError('doc-nombre', 'err-nombre', 'Escribe el nombre completo.');
+    valido = false;
+  }
+  if (!correo) {
+    marcarError('doc-correo', 'err-correo', 'Escribe el correo.');
+    valido = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    marcarError('doc-correo', 'err-correo', 'El correo no es válido.');
+    valido = false;
+  }
+  if ((!docenteEditando && contrasena.length < 6) || (docenteEditando && contrasena && contrasena.length < 6)) {
+    marcarError('doc-contrasena', 'err-contrasena', 'Mínimo 6 caracteres.');
+    valido = false;
+  }
+  if (telefono && !/^\+?[0-9\s-]{7,15}$/.test(telefono)) {
+    marcarError('doc-telefono', 'err-telefono', 'Teléfono no válido.');
+    valido = false;
+  }
+  if (!especialidad) {
+    marcarError('doc-especialidad', 'err-especialidad', 'Escribe la especialidad.');
+    valido = false;
+  }
+  if (!valido) return;
+
+  const cuerpo = {
+    nombre_completo: nombreCompleto,
+    correo: correo,
+    datosPerfil: { especialidad: especialidad }
+  };
+  if (contrasena) cuerpo.contrasena = contrasena;
+  if (!docenteEditando) cuerpo.rol = 'docente';
+  if (telefono) cuerpo.telefono = telefono;
+
+  const btn = porId('btn-guardar-docente');
+  btn.disabled = true;
+
+  try {
+    const editando = !!docenteEditando;
+    const res = editando
+      ? await apiFetch('/admin/usuarios/' + docenteEditando.id, { method: 'PUT', body: cuerpo })
+      : await apiFetch('/admin/usuarios', { method: 'POST', body: cuerpo });
+
+    if (res && res.ok) {
+      cerrarModalDocente();
+      await cargarUsuarios();
+      pintarStats();
+      pintarTabla();
+      mostrarAlerta('exito', 'Docente ' + nombreCompleto + (editando ? ' actualizado correctamente.' : ' creado correctamente.'));
+    } else {
+      setTexto('err-general', (res && res.datos && res.datos.mensaje) || (editando ? 'No se pudo actualizar el docente.' : 'No se pudo crear el docente.'));
+      btn.disabled = false;
+    }
+  } catch (err) {
+    console.error(err);
+    setTexto('err-general', 'No se pudo conectar con el servidor.');
+    btn.disabled = false;
+  }
+}
+
+// ── 13. EVENTOS ─────────────────────────────────────────────
+porId('input-busqueda').addEventListener('input', pintarTabla);
+porId('filtro-estado').addEventListener('change', pintarTabla);
+porId('filtro-salon').addEventListener('change', pintarTabla);
+
+porId('btn-limpiar').addEventListener('click', function () {
+  porId('input-busqueda').value = '';
+  porId('filtro-estado').value = '';
+  porId('filtro-salon').value = '';
+  pintarTabla();
+});
+
+// Modal nuevo docente
+porId('btn-nuevo-docente').addEventListener('click', function () { abrirModalDocente(); });
+porId('sb-nuevo-docente').addEventListener('click', function () { abrirModalDocente(); });
+porId('btn-cerrar-modal').addEventListener('click', cerrarModalDocente);
+porId('btn-cancelar-modal').addEventListener('click', cerrarModalDocente);
+porId('form-docente').addEventListener('submit', guardarDocente);
+porId('modal-overlay').addEventListener('click', function (e) {
+  if (e.target === this) cerrarModalDocente();
+});
+
+// Modal desactivar
+porId('btn-cerrar-eliminar').addEventListener('click', cerrarModalDesactivar);
+porId('btn-cancelar-eliminar').addEventListener('click', cerrarModalDesactivar);
+porId('modal-eliminar').addEventListener('click', function (e) {
+  if (e.target === this) cerrarModalDesactivar();
+});
+porId('btn-confirmar-eliminar').addEventListener('click', async function () {
+  if (!docenteADesactivar) return;
+  const docente = docenteADesactivar;
+  const btn = this;
+  btn.disabled = true;
+  await cambiarEstado(docente, false, null);
+  btn.disabled = false;
+  cerrarModalDesactivar();
+});
+
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
-    cerrarModal();
-    cerrarModalEliminar();
+    cerrarModalDocente();
+    cerrarModalDesactivar();
   }
 });
 
-// ══════════════════════════════════════════
-// TOAST (mismo patrón que inicio_admin.js)
-// ══════════════════════════════════════════
-function mostrarToast(mensaje, esError) {
-  var existente = document.querySelector('.toast-notif');
-  if (existente) existente.remove();
+// Acciones rápidas hacia las otras páginas
+porId('sb-nuevo-alumno').addEventListener('click', function () {
+  window.location.href = 'alumnos.html?nuevo=1';
+});
+porId('sb-nuevo-salon').addEventListener('click', function () {
+  window.location.href = 'salones.html?nuevo=1';
+});
 
-  var toast = document.createElement('div');
-  toast.className = 'toast-notif';
-  toast.textContent = mensaje;
-  toast.style.cssText = [
-    'position:fixed','bottom:28px','right:28px','z-index:999',
-    'background:' + (esError ? 'var(--rojo)' : 'var(--morado)'),
-    'color:#fff','padding:12px 22px','border-radius:50px',
-    'font-size:0.85rem','font-weight:600',
-    'box-shadow:0 4px 18px rgba(0,0,0,0.18)',
-    'animation:slideInToast 0.3s ease',
-    'pointer-events:none'
-  ].join(';');
-
-  if (!document.getElementById('style-toast')) {
-    var s = document.createElement('style');
-    s.id = 'style-toast';
-    s.textContent = '@keyframes slideInToast{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}';
-    document.head.appendChild(s);
+// ── 14. ARRANCAR ────────────────────────────────────────────
+async function iniciar() {
+  pintarFecha();
+  try {
+    await Promise.all([cargarUsuarios(), cargarSalones(), cargarMatriculas()]);
+  } catch (err) {
+    console.error('Error al cargar los datos:', err);
+    mostrarAlerta('error', 'No se pudo conectar con el servidor.');
   }
+  llenarFiltroSalon();
+  pintarStats();
+  pintarTabla();
 
-  document.body.appendChild(toast);
-  setTimeout(function () {
-    toast.style.opacity    = '0';
-    toast.style.transition = 'opacity 0.3s';
-    setTimeout(function () { toast.remove(); }, 320);
-  }, 2500);
+  // Llegó desde "Nuevo Docente" del inicio: abrir el modal y limpiar la URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('nuevo') === '1') {
+    abrirModalDocente();
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 }
+
+if (sesionValida) iniciar();

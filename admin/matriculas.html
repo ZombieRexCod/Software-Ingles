@@ -101,6 +101,9 @@
         </div>
       </div>
 
+      <!-- ALERTA -->
+      <div class="alerta" id="alerta"></div>
+
       <!-- ── STATS ── -->
       <div class="grid-stats">
 
@@ -119,25 +122,25 @@
             <span class="stat-numero" id="stat-pendientes">0</span>
             <span class="stat-label">Pendientes</span>
           </div>
-          <span class="stat-delta alerta">&#9888; Requiere revisión</span>
+          <span class="stat-delta alerta" id="delta-pendientes">&#9888; Requiere revisión</span>
         </div>
 
         <div class="stat-card stat-aprobadas">
           <div class="stat-icono">&#9989;</div>
           <div class="stat-info">
             <span class="stat-numero" id="stat-aprobadas">0</span>
-            <span class="stat-label">Aprobadas</span>
+            <span class="stat-label">Activas</span>
           </div>
-          <span class="stat-delta positivo">&#8679; Al día</span>
+          <span class="stat-delta positivo">&#8679; Aprobadas</span>
         </div>
 
         <div class="stat-card stat-rechazadas">
           <div class="stat-icono">&#10060;</div>
           <div class="stat-info">
             <span class="stat-numero" id="stat-rechazadas">0</span>
-            <span class="stat-label">Rechazadas</span>
+            <span class="stat-label">Canceladas</span>
           </div>
-          <span class="stat-delta neutro">&#8212; Este mes</span>
+          <span class="stat-delta neutro">&#8212; Rechazadas</span>
         </div>
 
       </div>
@@ -148,31 +151,23 @@
 
           <div class="campo-busqueda">
             <span class="icono-buscar">&#128269;</span>
-            <input type="text" id="input-busqueda" class="input-busqueda" placeholder="Buscar por nombre o código..." />
+            <input type="text" id="input-busqueda" class="input-busqueda" placeholder="Buscar por estudiante, salón o número..." />
           </div>
 
           <select id="filtro-estado" class="select-filtro">
             <option value="todos">Todos los estados</option>
             <option value="pendiente">Pendiente</option>
-            <option value="aprobado">Aprobado</option>
-            <option value="rechazado">Rechazado</option>
+            <option value="activa">Activa</option>
+            <option value="cancelada">Cancelada</option>
           </select>
 
+          <!-- Las opciones de nivel y salón las llena matriculas_admin.js con los datos reales -->
           <select id="filtro-nivel" class="select-filtro">
             <option value="todos">Todos los niveles</option>
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-            <option value="C1">C1</option>
           </select>
 
           <select id="filtro-salon" class="select-filtro">
             <option value="todos">Todos los salones</option>
-            <option value="Canadá">Canadá</option>
-            <option value="Nueva Zelanda">Nueva Zelanda</option>
-            <option value="Miami">Miami</option>
-            <option value="Londres">Londres</option>
           </select>
 
           <button class="btn-reset-filtros" id="btn-reset-filtros">Limpiar filtros</button>
@@ -183,7 +178,7 @@
       <section class="card-seccion">
         <div class="card-header">
           <h2>Listado de Matrículas</h2>
-          <span class="badge-conteo" id="badge-actividad">2026</span>
+          <span class="badge-conteo" id="badge-actividad">—</span>
         </div>
 
         <div class="tabla-wrap">
@@ -194,14 +189,14 @@
                 <th>Estudiante</th>
                 <th>Nivel</th>
                 <th>Salón</th>
-                <th>Método de Pago</th>
+                <th>Saldo pendiente</th>
                 <th>Fecha</th>
                 <th>Estado</th>
                 <th>Acción</th>
               </tr>
             </thead>
             <tbody id="tbody-matriculas">
-              <!-- Las filas se generan dinámicamente desde matriculas_admin.js -->
+              <tr><td colspan="8" style="padding:24px;text-align:center;">Cargando matrículas...</td></tr>
             </tbody>
           </table>
         </div>
@@ -213,54 +208,92 @@
     </main>
   </div>
 
-  <!-- ===== MODAL NUEVA MATRÍCULA ===== -->
-  <div class="modal-overlay" id="modal-nueva-matricula">
+  <!-- ===== MODAL: REGISTRAR PAGO ===== -->
+  <div class="modal-overlay" id="modal-pago">
     <div class="modal-box">
       <div class="modal-header">
-        <h2>Nueva Matrícula</h2>
-        <button class="btn-cerrar-modal" id="btn-cerrar-modal">&#10005;</button>
+        <h2>Registrar pago</h2>
+        <button type="button" class="btn-cerrar-modal" id="btn-cerrar-pago" title="Cerrar">&times;</button>
       </div>
 
-      <form class="modal-form" id="form-nueva-matricula">
+      <form class="modal-form" id="form-pago" novalidate>
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label>Estudiante</label>
+            <span id="pago-estudiante">—</span>
+          </div>
+          <div class="form-grupo">
+            <label>Salón</label>
+            <span id="pago-salon">—</span>
+          </div>
+        </div>
+
         <div class="form-grupo">
-          <label for="input-nombre-alumno">Nombre del estudiante</label>
-          <input type="text" id="input-nombre-alumno" placeholder="Ej. María Fernanda López" required />
+          <label>Saldo pendiente</label>
+          <span id="pago-saldo">—</span>
         </div>
 
         <div class="form-fila">
           <div class="form-grupo">
-            <label for="select-nivel-modal">Nivel</label>
-            <select id="select-nivel-modal" required>
-              <option value="A1">A1</option>
-              <option value="A2">A2</option>
-              <option value="B1">B1</option>
-              <option value="B2">B2</option>
-              <option value="C1">C1</option>
-            </select>
+            <label for="pago-monto">Monto a pagar (COP)</label>
+            <input type="number" id="pago-monto" min="1" step="1" placeholder="Ej: 150000" />
           </div>
           <div class="form-grupo">
-            <label for="select-salon-modal">Salón</label>
-            <select id="select-salon-modal" required>
-              <option value="Canadá">Canadá</option>
-              <option value="Nueva Zelanda">Nueva Zelanda</option>
-              <option value="Miami">Miami</option>
-              <option value="Londres">Londres</option>
+            <label for="pago-metodo">Método de pago</label>
+            <select id="pago-metodo">
+              <option value="">Selecciona...</option>
+              <option value="pse">PSE</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
             </select>
           </div>
         </div>
 
         <div class="form-grupo">
-          <label for="select-metodo-modal">Método de pago</label>
-          <select id="select-metodo-modal" required>
-            <option value="pse">PSE</option>
-            <option value="transferencia">Transferencia</option>
-            <option value="tarjeta">Tarjeta</option>
+          <label for="pago-referencia">Referencia de la transacción (opcional)</label>
+          <input type="text" id="pago-referencia" maxlength="100" placeholder="Ej: número de comprobante" />
+        </div>
+
+        <p id="pago-error" style="color:var(--rojo);font-size:0.8rem;min-height:1em;"></p>
+
+        <div class="modal-acciones">
+          <button type="button" class="btn-modal-cancelar" id="btn-cancelar-pago">Cancelar</button>
+          <button type="submit" class="btn-modal-guardar" id="btn-guardar-pago">Registrar pago</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: NUEVA MATRÍCULA ===== -->
+  <div class="modal-overlay" id="modal-nueva">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Nueva matrícula</h2>
+        <button type="button" class="btn-cerrar-modal" id="btn-cerrar-nueva" title="Cerrar">&times;</button>
+      </div>
+
+      <form class="modal-form" id="form-nueva" novalidate>
+        <div class="form-grupo">
+          <label for="nueva-estudiante">Estudiante</label>
+          <select id="nueva-estudiante">
+            <option value="">Selecciona...</option>
           </select>
         </div>
 
+        <div class="form-grupo">
+          <label for="nueva-salon">Salón</label>
+          <select id="nueva-salon">
+            <option value="">Selecciona...</option>
+          </select>
+        </div>
+
+        <p style="font-size:0.8rem;color:var(--gris-texto);">La matrícula se crea como <strong>Pendiente</strong> con el valor del nivel. Después registra el pago y usa "Aprobar".</p>
+
+        <p id="nueva-error" style="color:var(--rojo);font-size:0.8rem;min-height:1em;"></p>
+
         <div class="modal-acciones">
-          <button type="button" class="btn-modal-cancelar" id="btn-modal-cancelar">Cancelar</button>
-          <button type="submit" class="btn-modal-guardar">Registrar Matrícula</button>
+          <button type="button" class="btn-modal-cancelar" id="btn-cancelar-nueva">Cancelar</button>
+          <button type="submit" class="btn-modal-guardar" id="btn-guardar-nueva">Crear matrícula</button>
         </div>
       </form>
     </div>

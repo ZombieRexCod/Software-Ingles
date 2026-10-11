@@ -40,20 +40,8 @@
     <aside class="sidebar">
       <section class="sidebar-seccion">
         <h3>Mis Clases</h3>
-        <ul>
-          <li class="clase-item activa">
-            <span class="clase-dot rojo"></span>
-            <a href="inicio.html?salon=canada">Salón Canada</a>
-          </li>
-          <li class="clase-item">
-            <span class="clase-dot azul"></span>
-            <a href="inicio.html?salon=nueva-zelanda">Salón Nueva Zelanda</a>
-          </li>
-          <li class="clase-item">
-            <span class="clase-dot morado"></span>
-            <a href="inicio.html?salon=miami">Salón Miami</a>
-          </li>
-        </ul>
+        <!-- Lo llena tareas_docente.js con los salones reales -->
+        <ul id="lista-clases"></ul>
       </section>
       <section class="sidebar-seccion">
         <h3>Accesos Rápidos</h3>
@@ -72,144 +60,47 @@
       <div class="encabezado-pagina">
         <div>
           <h1>Gestión de Tareas</h1>
-          <p>Crea, edita y revisa las tareas de tus salones</p>
+          <p>Crea y revisa las tareas de tus salones</p>
         </div>
         <div class="encabezado-acciones">
           <button class="btn-nueva-tarea" id="btn-nueva-tarea">+ Nueva Tarea</button>
         </div>
       </div>
 
+      <!-- ALERTA -->
+      <div class="alerta" id="alerta"></div>
+
       <!-- FILTROS -->
       <section class="card-seccion filtros-wrap">
         <div class="filtros">
           <button class="btn-filtro activo" data-filtro="todas">Todas</button>
           <button class="btn-filtro" data-filtro="activa">Activas</button>
-          <button class="btn-filtro" data-filtro="revision">En Revisión</button>
           <button class="btn-filtro" data-filtro="cerrada">Cerradas</button>
         </div>
         <div class="filtro-salon">
           <select id="select-salon" class="select-salon">
             <option value="todos">Todos los salones</option>
-            <option value="canada">Salón Canadá</option>
-            <option value="zelanda">Salón Nueva Zelanda</option>
-            <option value="miami">Salón Miami</option>
           </select>
         </div>
       </section>
 
-      <!-- TAREAS ACTIVAS -->
+      <!-- LISTA DE TAREAS -->
       <section class="card-seccion">
         <div class="card-header">
-          <h2>Tareas Activas</h2>
-          <span class="badge-conteo" id="conteo-activas">3 tareas</span>
+          <h2>Tareas</h2>
+          <span class="badge-conteo" id="conteo-tareas">—</span>
         </div>
 
         <div class="lista-tareas" id="lista-tareas-activas">
-
-          <!-- Tarea 1 -->
-          <div class="tarea-item" data-salon="canada" data-estado="activa">
-            <div class="tarea-color bloque-canada"></div>
-            <div class="tarea-cuerpo">
-              <div class="tarea-cabecera">
-                <div>
-                  <p class="tarea-titulo">Redacción: My Daily Routine</p>
-                  <p class="tarea-salon">Salón Canadá &bull; A1</p>
-                </div>
-                <span class="badge-estado activo">Activa</span>
-              </div>
-              <p class="tarea-descripcion">
-                Escribir un párrafo de 80 palabras describiendo la rutina diaria usando presente simple.
-              </p>
-              <div class="tarea-meta">
-                <span class="meta-item">&#128197; Vence: <strong>30 Abr 2026</strong></span>
-                <span class="meta-item">&#128101; 10 estudiantes</span>
-                <span class="meta-item entregadas">&#10003; 6 entregadas</span>
-                <span class="meta-item pendientes">&#9679; 4 pendientes</span>
-              </div>
-              <div class="tarea-acciones">
-                <button class="btn-accion btn-ver-entregas" data-id="1">Ver entregas</button>
-                <button class="btn-accion btn-editar" data-id="1">Editar</button>
-                <select class="select-estado" data-id="1">
-                  <option value="activa" selected>Activa</option>
-                  <option value="revision">En Revisión</option>
-                  <option value="cerrada">Cerrada</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarea 2 -->
-          <div class="tarea-item" data-salon="zelanda" data-estado="activa">
-            <div class="tarea-color bloque-zelanda"></div>
-            <div class="tarea-cuerpo">
-              <div class="tarea-cabecera">
-                <div>
-                  <p class="tarea-titulo">Listening: BBC 6 Minute English</p>
-                  <p class="tarea-salon">Salón Nueva Zelanda &bull; B2</p>
-                </div>
-                <span class="badge-estado activo">Activa</span>
-              </div>
-              <p class="tarea-descripcion">
-                Escuchar el episodio del 22 de abril y responder las 5 preguntas de comprensión auditiva.
-              </p>
-              <div class="tarea-meta">
-                <span class="meta-item">&#128197; Vence: <strong>2 May 2026</strong></span>
-                <span class="meta-item">&#128101; 12 estudiantes</span>
-                <span class="meta-item entregadas">&#10003; 3 entregadas</span>
-                <span class="meta-item pendientes">&#9679; 9 pendientes</span>
-              </div>
-              <div class="tarea-acciones">
-                <button class="btn-accion btn-ver-entregas" data-id="2">Ver entregas</button>
-                <button class="btn-accion btn-editar" data-id="2">Editar</button>
-                <select class="select-estado" data-id="2">
-                  <option value="activa" selected>Activa</option>
-                  <option value="revision">En Revisión</option>
-                  <option value="cerrada">Cerrada</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarea 3 -->
-          <div class="tarea-item" data-salon="miami" data-estado="activa">
-            <div class="tarea-color bloque-miami"></div>
-            <div class="tarea-cuerpo">
-              <div class="tarea-cabecera">
-                <div>
-                  <p class="tarea-titulo">Essay: Technology and Society</p>
-                  <p class="tarea-salon">Salón Miami &bull; C1</p>
-                </div>
-                <span class="badge-estado activo">Activa</span>
-              </div>
-              <p class="tarea-descripcion">
-                Redactar un ensayo argumentativo de 250 palabras sobre el impacto de la IA en el mercado laboral.
-              </p>
-              <div class="tarea-meta">
-                <span class="meta-item">&#128197; Vence: <strong>5 May 2026</strong></span>
-                <span class="meta-item">&#128101; 8 estudiantes</span>
-                <span class="meta-item entregadas">&#10003; 0 entregadas</span>
-                <span class="meta-item pendientes">&#9679; 8 pendientes</span>
-              </div>
-              <div class="tarea-acciones">
-                <button class="btn-accion btn-ver-entregas" data-id="3">Ver entregas</button>
-                <button class="btn-accion btn-editar" data-id="3">Editar</button>
-                <select class="select-estado" data-id="3">
-                  <option value="activa" selected>Activa</option>
-                  <option value="revision">En Revisión</option>
-                  <option value="cerrada">Cerrada</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
+          <p style="padding:24px;text-align:center;">Cargando tareas...</p>
         </div>
       </section>
 
-      <!-- ENTREGAS RECIENTES -->
+      <!-- ENTREGAS RECIENTES (las llena tareas_docente.js con las entregas reales) -->
       <section class="card-seccion">
         <div class="card-header">
           <h2>Entregas Recientes</h2>
-          <span class="badge-conteo">Últimas 5</span>
+          <span class="badge-conteo" id="conteo-entregas">—</span>
         </div>
 
         <table class="tabla-entregas">
@@ -225,104 +116,43 @@
             </tr>
           </thead>
           <tbody id="tbody-entregas">
-
-            <tr class="fila-entrega">
-              <td>
-                <div class="estudiante-info">
-                  <div class="avatar-mini">L</div>
-                  Laura Gómez
-                </div>
-              </td>
-              <td class="tarea-nombre-td">My Daily Routine</td>
-              <td><span class="dot-salon rojo"></span> Canadá</td>
-              <td>28 Abr 2026</td>
-              <td><span class="badge-estado entregado">Entregada</span></td>
-              <td>
-                <input type="number" class="input-nota" value="85" min="0" max="100" />
-              </td>
-              <td>
-                <button class="btn-calificar">Guardar</button>
-              </td>
+            <tr>
+              <td colspan="7" style="padding:24px;text-align:center;">Cargando entregas...</td>
             </tr>
-
-            <tr class="fila-entrega">
-              <td>
-                <div class="estudiante-info">
-                  <div class="avatar-mini">C</div>
-                  Carlos Ríos
-                </div>
-              </td>
-              <td class="tarea-nombre-td">My Daily Routine</td>
-              <td><span class="dot-salon rojo"></span> Canadá</td>
-              <td>27 Abr 2026</td>
-              <td><span class="badge-estado revisado">Revisada</span></td>
-              <td>
-                <input type="number" class="input-nota" value="92" min="0" max="100" />
-              </td>
-              <td>
-                <button class="btn-calificar">Guardar</button>
-              </td>
-            </tr>
-
-            <tr class="fila-entrega">
-              <td>
-                <div class="estudiante-info">
-                  <div class="avatar-mini">M</div>
-                  María Paz
-                </div>
-              </td>
-              <td class="tarea-nombre-td">BBC 6 Minute English</td>
-              <td><span class="dot-salon azul"></span> Zelanda</td>
-              <td>27 Abr 2026</td>
-              <td><span class="badge-estado entregado">Entregada</span></td>
-              <td>
-                <input type="number" class="input-nota" value="" min="0" max="100" placeholder="—" />
-              </td>
-              <td>
-                <button class="btn-calificar">Guardar</button>
-              </td>
-            </tr>
-
-            <tr class="fila-entrega">
-              <td>
-                <div class="estudiante-info">
-                  <div class="avatar-mini">A</div>
-                  Andrés López
-                </div>
-              </td>
-              <td class="tarea-nombre-td">My Daily Routine</td>
-              <td><span class="dot-salon rojo"></span> Canadá</td>
-              <td>26 Abr 2026</td>
-              <td><span class="badge-estado revisado">Revisada</span></td>
-              <td>
-                <input type="number" class="input-nota" value="78" min="0" max="100" />
-              </td>
-              <td>
-                <button class="btn-calificar">Guardar</button>
-              </td>
-            </tr>
-
-            <tr class="fila-entrega">
-              <td>
-                <div class="estudiante-info">
-                  <div class="avatar-mini">S</div>
-                  Sofía Torres
-                </div>
-              </td>
-              <td class="tarea-nombre-td">My Daily Routine</td>
-              <td><span class="dot-salon rojo"></span> Canadá</td>
-              <td>25 Abr 2026</td>
-              <td><span class="badge-estado revisado">Revisada</span></td>
-              <td>
-                <input type="number" class="input-nota" value="95" min="0" max="100" />
-              </td>
-              <td>
-                <button class="btn-calificar">Guardar</button>
-              </td>
-            </tr>
-
           </tbody>
         </table>
+      </section>
+
+      <!-- MATERIAL DE APOYO (lo llena tareas_docente.js con el material real) -->
+      <section class="card-seccion">
+        <div class="card-header">
+          <h2>Material de Apoyo</h2>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="badge-conteo" id="conteo-material">—</span>
+            <button class="btn-nueva-tarea" id="btn-subir-material">+ Subir Material</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="tabla-entregas">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Salón</th>
+                <th>Ciclo</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Visibilidad</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-material">
+              <tr>
+                <td colspan="7" style="padding:24px;text-align:center;">Cargando material...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
     </main>
@@ -347,11 +177,23 @@
           <label for="m-salon">Salón <span class="oblig">*</span></label>
           <select id="m-salon">
             <option value="">Selecciona un salón</option>
-            <option value="canada">Salón Canadá</option>
-            <option value="zelanda">Salón Nueva Zelanda</option>
-            <option value="miami">Salón Miami</option>
           </select>
           <span class="m-error" id="e-salon"></span>
+        </div>
+
+        <div class="grid-modal-2">
+          <div class="campo-modal">
+            <label for="m-ciclo">Ciclo <span class="oblig">*</span></label>
+            <select id="m-ciclo">
+              <option value="">Selecciona primero un salón</option>
+            </select>
+            <span class="m-error" id="e-ciclo"></span>
+          </div>
+          <div class="campo-modal">
+            <label for="m-porcentaje">Valor (%)</label>
+            <input type="number" id="m-porcentaje" min="0" max="100" step="1" placeholder="Ej. 20" />
+            <span class="m-error" id="e-porcentaje"></span>
+          </div>
         </div>
 
         <div class="grid-modal-2">
@@ -379,14 +221,97 @@
 
         <div class="campo-modal">
           <label for="m-archivo">Adjuntar material (opcional)</label>
-          <input type="file" id="m-archivo" accept=".pdf,.doc,.docx,.pptx" />
-          <small class="texto-ayuda">PDF, Word o PowerPoint. Máx. 10 MB.</small>
+          <input type="file" id="m-archivo" accept=".pdf,.doc,.docx,.pptx" disabled />
+          <small class="texto-ayuda">Próximamente: la subida de archivos aún no está disponible.</small>
         </div>
+
+        <span class="m-error" id="e-general"></span>
 
       </div>
       <div class="modal-footer">
         <button class="btn-modal-cancelar" id="btn-cancelar-modal">Cancelar</button>
         <button class="btn-modal-guardar" id="btn-guardar-modal">Crear Tarea</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL ENTREGAS DE UNA TAREA ===== -->
+  <div class="modal-overlay oculto" id="modal-entregas" role="dialog" aria-modal="true" aria-labelledby="entregas-titulo">
+    <div class="modal-caja" style="max-width:920px;">
+      <div class="modal-header">
+        <h2 id="entregas-titulo">Entregas</h2>
+        <button class="btn-cerrar-modal" id="btn-cerrar-entregas" aria-label="Cerrar modal">✕</button>
+      </div>
+      <div class="modal-cuerpo">
+        <p class="tarea-salon" id="entregas-subtitulo"></p>
+        <div style="overflow-x:auto;">
+          <table class="tabla-entregas">
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Fecha entrega</th>
+                <th>Estado</th>
+                <th>Nota (0 - 5)</th>
+                <th>Comentario</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-modal-entregas"></tbody>
+          </table>
+        </div>
+        <span class="m-error" id="e-entregas"></span>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancelar" id="btn-cerrar-entregas-pie">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL SUBIR MATERIAL ===== -->
+  <div class="modal-overlay oculto" id="modal-material" role="dialog" aria-modal="true" aria-labelledby="material-titulo">
+    <div class="modal-caja">
+      <div class="modal-header">
+        <h2 id="material-titulo">Subir Material de Apoyo</h2>
+        <button class="btn-cerrar-modal" id="btn-cerrar-material" aria-label="Cerrar modal">✕</button>
+      </div>
+      <div class="modal-cuerpo">
+
+        <div class="campo-modal">
+          <label for="mat-titulo">Título <span class="oblig">*</span></label>
+          <input type="text" id="mat-titulo" maxlength="150" placeholder="Ej. Guía de verbos irregulares" />
+          <span class="m-error" id="e-mat-titulo"></span>
+        </div>
+
+        <div class="grid-modal-2">
+          <div class="campo-modal">
+            <label for="mat-salon">Salón <span class="oblig">*</span></label>
+            <select id="mat-salon">
+              <option value="">Selecciona un salón</option>
+            </select>
+            <span class="m-error" id="e-mat-salon"></span>
+          </div>
+          <div class="campo-modal">
+            <label for="mat-ciclo">Ciclo <span class="oblig">*</span></label>
+            <select id="mat-ciclo">
+              <option value="">Selecciona primero un salón</option>
+            </select>
+            <span class="m-error" id="e-mat-ciclo"></span>
+          </div>
+        </div>
+
+        <div class="campo-modal">
+          <label for="mat-archivo">Archivo <span class="oblig">*</span></label>
+          <input type="file" id="mat-archivo" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3" />
+          <small class="texto-ayuda">PDF, Word, PowerPoint, Excel, JPG, PNG o MP3. Máximo 20 MB.</small>
+          <span class="m-error" id="e-mat-archivo"></span>
+        </div>
+
+        <span class="m-error" id="e-mat-general"></span>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancelar" id="btn-cancelar-material">Cancelar</button>
+        <button class="btn-modal-guardar" id="btn-guardar-material">Subir Material</button>
       </div>
     </div>
   </div>

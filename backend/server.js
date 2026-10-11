@@ -8,7 +8,9 @@ const authRoutes = require('./src/routes/auth.routes');
 const alumnosRoutes = require('./src/routes/alumnos.routes');   
 const adminRoutes = require('./src/routes/admin.routes');
 const docentesRoutes = require('./src/routes/docentes.routes'); 
-const admisionesRoutes = require('./src/routes/admisiones.routes');  // ← NUEVO
+const admisionesRoutes = require('./src/routes/admisiones.routes');
+const entregasRoutes = require('./src/routes/entregas.routes');
+const materialRoutes = require('./src/routes/material.routes');  // ← NUEVO
 
 const app = express();
 
@@ -18,7 +20,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/alumnos', alumnosRoutes);                          
 app.use('/api/admin', adminRoutes);
 app.use('/api/docentes', docentesRoutes);
-app.use('/api/admisiones', admisionesRoutes);  // ← NUEVO
+app.use('/api/admisiones', admisionesRoutes);
+app.use('/api/entregas', entregasRoutes);
+app.use('/api/material', materialRoutes); // ← NUEVO
+
+// Bloquea el acceso público al código y a los archivos subidos del backend
+app.use('/backend', (req, res) => {
+  res.status(404).json({ mensaje: 'No encontrado.' });
+});
 
 // Sirve el frontend (HTML, CSS, JS) desde la carpeta raíz del proyecto
 app.use(express.static(path.join(__dirname, '..')));

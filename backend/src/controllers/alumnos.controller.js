@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { sql, getPool } = require('../config/db');
 
 async function obtenerMiHorario(req, res) {
@@ -19,12 +20,15 @@ async function obtenerMiHorario(req, res) {
     // Ahora: traer el horario de los salones donde está matriculado
     const horarioResult = await pool.request()
       .input('id_estudiante', sql.Int, id_estudiante)
-      .query(`SELECT s.nombre AS salon, ht.dias_semana, ht.hora_inicio, ht.hora_fin, n.nombre AS nivel
-              FROM Matriculas m
-              JOIN Salones s ON m.salon_id = s.id
-              JOIN Horarios_Tipo ht ON s.horario_tipo_id = ht.id
-              JOIN Niveles n ON s.nivel_id = n.id
-              WHERE m.estudiante_id = @id_estudiante AND m.estado = 'activa'`);
+      .query(`SELECT s.nombre AS salon, ht.dias_semana, ht.hora_inicio, ht.hora_fin, n.nombre AS nivel,
+               u.nombre_completo AS docente
+        FROM Matriculas m
+        JOIN Salones s ON m.salon_id = s.id
+        JOIN Horarios_Tipo ht ON s.horario_tipo_id = ht.id
+        JOIN Niveles n ON s.nivel_id = n.id
+        JOIN Docentes d ON s.docente_id = d.id
+        JOIN Usuarios u ON d.usuario_id = u.id
+        WHERE m.estudiante_id = @id_estudiante AND m.estado = 'activa'`);
 
     res.json({ horario: horarioResult.recordset });
 
@@ -177,5 +181,134 @@ async function obtenerSalonVirtual(req, res) {
     res.status(500).json({ mensaje: 'Error al obtener el salón virtual.' });
   }
 }
+// Borra un archivo del disco sin romper nada si ya no existe
+function borrarArchivo(ruta) {
+  if (!ruta) return;
+  fs.unlink(ruta, function (err) {
+    if (err) console.error('No se pudo borrar el archivo:', err.message);
+  });
+}
 
-module.exports = { obtenerMiHorario, obtenerMisNotas, obtenerMisTareas, obtenerSalonVirtual };
+async function entregarTarea(req, res) {
+  const rutaArchivo = req.file ? req.file.path : null;
+
+  try {
+    // 1. ¿Llegó el archivo?
+    if (!req.file) {
+      return res.status(400).json({ mensaje: 'Debes adjuntar un archivo en el campo "archivo".' });
+    }
+
+    // 2. ¿El id de la tarea es válido?
+    const id_tarea = parseInt(req.params.id, 10);
+    if (isNaN(id_tarea)) {
+      borrarArchivo(rutaArchivo);
+      return res.status(400).json({ mensaje: 'Id de tarea inválido.' });
+    }
+
+    const pool = await getPool();
+
+    // 3. Perfil de estudiante
+    const estudianteResult = await pool.request()
+      .input('usuario_id', sql.Int, req.usuario.id_usuario)
+      .query('SELECT id FROM Estudiantes WHERE usuario_id = @usuario_id');
+
+    if (estudianteResult.recordset.length === 0) {
+      borrarArchivo(rutaArchivo);
+      return res.status(404).json({ mensaje: 'No se encontró un perfil de estudiante para este usuario.' });
+    }
+    const id_estudiante = estudianteResult.recordset[0].id;
+
+    // 4. La tarea debe ser de un salón donde tenga matrícula activa
+    const tareaResult = await pool.request()
+      .input('id_tarea', sql.Int, id_tarea)
+      .input('id_estudiante', sql.Int, id_estudiante)
+      .query(`SELECT t.id, t.fecha_limite
+              FROM Tareas t
+              JOIN Matriculas m ON m.salon_id = t.salon_id
+              WHERE t.id = @id_tarea
+                AND m.estudiante_id = @id_estudiante
+                AND m.estado = 'activa'`);
+
+    if (tareaResult.recordset.length === 0) {
+      borrarArchivo(rutaArchivo);
+      return res.status(404).json({ mensaje: 'Tarea no encontrada.' });
+    }
+    const tarea = tareaResult.recordset[0];
+
+    // 5. No debe existir una entrega previa
+    const previaResult = await pool.request()
+      .input('id_tarea', sql.Int, id_tarea)
+      .input('id_estudiante', sql.Int, id_estudiante)
+      .query('SELECT id FROM Entregas_Tareas WHERE tarea_id = @id_tarea AND estudiante_id = @id_estudiante');
+
+    if (previaResult.recordset.length > 0) {
+      borrarArchivo(rutaArchivo);
+      return res.status(409).json({ mensaje: 'Ya entregaste esta tarea.' });
+    }
+
+    // 6. La fecha límite no debe haber pasado (el último día aún se puede entregar)
+    const hoy = new Date();
+    const hoyTexto = hoy.getFullYear() + '-' +
+      String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+      String(hoy.getDate()).padStart(2, '0');
+    const limiteTexto = tarea.fecha_limite.toISOString().substring(0, 10);
+
+    if (limiteTexto < hoyTexto) {
+      borrarArchivo(rutaArchivo);
+      return res.status(409).json({ mensaje: 'La fecha límite de esta tarea ya venció.' });
+    }
+
+    // 7. Guardar la entrega
+    const insertResult = await pool.request()
+      .input('id_tarea', sql.Int, id_tarea)
+      .input('id_estudiante', sql.Int, id_estudiante)
+      .input('archivo_url', sql.NVarChar, req.file.filename)
+      .query(`INSERT INTO Entregas_Tareas (tarea_id, estudiante_id, fecha_entrega, estado, archivo_url)
+              OUTPUT INSERTED.id
+              VALUES (@id_tarea, @id_estudiante, GETDATE(), 'entregada', @archivo_url)`);
+
+    res.status(201).json({
+      mensaje: 'Tarea entregada correctamente.',
+      id_entrega: insertResult.recordset[0].id
+    });
+
+  } catch (err) {
+    console.error(err);
+    borrarArchivo(rutaArchivo);
+    res.status(500).json({ mensaje: 'Error al entregar la tarea.' });
+  }
+}
+async function obtenerMiMaterial(req, res) {
+  try {
+    const pool = await getPool();
+
+    const estudianteResult = await pool.request()
+      .input('usuario_id', sql.Int, req.usuario.id_usuario)
+      .query('SELECT id FROM Estudiantes WHERE usuario_id = @usuario_id');
+
+    if (estudianteResult.recordset.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontró un perfil de estudiante para este usuario.' });
+    }
+    const id_estudiante = estudianteResult.recordset[0].id;
+
+    // Solo material visible (publico = 1) de salones con matrícula activa
+    const materialResult = await pool.request()
+      .input('id_estudiante', sql.Int, id_estudiante)
+      .query(`SELECT m.id, s.nombre AS salon, c.numero_ciclo, m.titulo, m.tipo, m.subido_en
+              FROM Material_Apoyo m
+              JOIN Salones s ON m.salon_id = s.id
+              JOIN Ciclos c ON m.ciclo_id = c.id
+              JOIN Matriculas ma ON ma.salon_id = s.id
+              WHERE ma.estudiante_id = @id_estudiante
+                AND ma.estado = 'activa'
+                AND m.publico = 1
+              ORDER BY m.subido_en DESC`);
+
+    res.json({ material: materialResult.recordset });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ mensaje: 'Error al obtener el material de apoyo.' });
+  }
+}
+module.exports = { obtenerMiHorario, obtenerMisNotas, obtenerMisTareas, obtenerSalonVirtual, entregarTarea, obtenerMiMaterial };

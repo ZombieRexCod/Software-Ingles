@@ -16,7 +16,7 @@ let perfilSeleccionado = null;
 const mensajes = {
   nuevo:   'Perfecto, te registraremos como Nuevo Estudiante.',
   actual:  'Perfecto, continuaremos tu proceso como Estudiante Actual.',
-  empresa: 'Perfecto, te contactaremos para tu proceso Empresarial / Corporativo.'
+  empresa: 'Perfecto, te llevaremos a contacto para atender a tu empresa.'
 };
 
 cardsPerfil.forEach(function (card) {
@@ -34,8 +34,18 @@ cardsPerfil.forEach(function (card) {
   });
 });
 
-// ── 2. CONTINUAR AL REGISTRO CON EL PERFIL ELEGIDO ─────────
+// ── 2. CONTINUAR SEGÚN EL PERFIL ELEGIDO ──────────────────
 btnContinuar.addEventListener('click', function () {
   if (!perfilSeleccionado) return;
-  window.location.href = '../auth/registro.html?perfil=' + encodeURIComponent(perfilSeleccionado);
+
+  // La base de datos no tiene un flujo corporativo: las empresas se atienden
+  // por la sección de contacto.
+  if (perfilSeleccionado === 'empresa') {
+    window.location.href = '../index.html#contacto';
+    return;
+  }
+
+  // Nuevo o actual: continúan a la inscripción (nivel → horario → pago).
+  // Allí se les pide iniciar sesión o crear cuenta si aún no la tienen.
+  window.location.href = 'inscripcion.html?perfil=' + encodeURIComponent(perfilSeleccionado);
 });

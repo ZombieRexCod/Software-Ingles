@@ -4,6 +4,9 @@
    Ubicación: assets/css/index.css
 ============================================================ */
 
+/* ── Tipografías web (Playfair Display para títulos, Poppins para texto) ── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
 /* ── Reset y base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 a { text-decoration: none; color: inherit; }
@@ -19,8 +22,8 @@ ul { list-style: none; }
   --gris-claro:   #F5F5F5;
   --gris-texto:   #555555;
   --negro:        #1A1A1A;
-  --font-titulo:  'Georgia', serif;
-  --font-cuerpo:  'Segoe UI', Arial, sans-serif;
+  --font-titulo:  'Playfair Display', Georgia, serif;
+  --font-cuerpo:  'Poppins', 'Segoe UI', Arial, sans-serif;
   --radio:        8px;
   --sombra:       0 4px 16px rgba(0,0,0,0.12);
 }
@@ -29,7 +32,14 @@ body {
   font-family: var(--font-cuerpo);
   color: var(--negro);
   background: var(--blanco);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
+
+/* Ritmo tipográfico común a todas las páginas */
+p { line-height: 1.65; }
+h1, h2, h3 { letter-spacing: -0.01em; }
 
 /* ============================================================
    NAVBAR
@@ -230,9 +240,9 @@ nav {
 
 .hero-texto h1 {
   font-family: var(--font-titulo);
-  font-size: 2rem;
-  margin-bottom: 12px;
-  line-height: 1.3;
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  margin-bottom: 16px;
+  line-height: 1.2;
 }
 
 .hero-texto p { font-size: 1.1rem; margin-bottom: 28px; opacity: 0.92; }
@@ -287,8 +297,8 @@ nav {
 }
 
 .card-caracteristica:hover { box-shadow: var(--sombra); transform: translateY(-4px); }
-.card-caracteristica .icono { font-size: 2.5rem; margin-bottom: 16px; display: block; }
-.card-caracteristica h2 { font-size: 1rem; font-weight: bold; margin-bottom: 8px; }
+.card-caracteristica .icono { font-size: 2.2rem; margin-bottom: 16px; display: block; }
+.card-caracteristica h2 { font-size: 1rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
 .card-caracteristica p { font-size: 0.9rem; color: var(--gris-texto); line-height: 1.5; }
 
 /* ============================================================
@@ -301,7 +311,7 @@ nav {
   text-align: center;
 }
 
-.camino-exito h2 { font-family: var(--font-titulo); font-size: 1.8rem; margin-bottom: 12px; }
+.camino-exito h2 { font-family: var(--font-titulo); font-size: clamp(1.5rem, 3vw, 1.9rem); margin-bottom: 14px; }
 
 .camino-exito .subtitulo {
   font-size: 1.05rem;
@@ -431,5 +441,5 @@ footer { background: var(--negro); color: #cccccc; padding: 48px 24px 24px; }
   .grid-caracteristicas,
   .grid-estadisticas,
   .footer-grid { grid-template-columns: 1fr; }
-  .hero-texto h1 { font-size: 1.4rem; }
+  
 }

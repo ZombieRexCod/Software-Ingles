@@ -96,9 +96,12 @@
           <p id="texto-fecha">Cargando fecha...</p>
         </div>
         <div class="encabezado-acciones">
-          <a href="matriculas.html" class="btn-accion-header">&#43; Nueva Matrícula</a>
+          <a href="matriculas.html" class="btn-accion-header">Ver Matrículas &#8594;</a>
         </div>
       </div>
+
+      <!-- ALERTA -->
+      <div class="alerta" id="alerta"></div>
 
       <!-- ── STATS ── -->
       <div class="grid-stats">
@@ -109,7 +112,7 @@
             <span class="stat-numero" id="stat-alumnos">0</span>
             <span class="stat-label">Alumnos Activos</span>
           </div>
-          <span class="stat-delta positivo">&#8679; +4 este mes</span>
+          <span class="stat-delta neutro" id="delta-alumnos">—</span>
         </div>
 
         <div class="stat-card stat-docentes">
@@ -118,7 +121,7 @@
             <span class="stat-numero" id="stat-docentes">0</span>
             <span class="stat-label">Docentes</span>
           </div>
-          <span class="stat-delta neutro">&#8212; Sin cambios</span>
+          <span class="stat-delta neutro" id="delta-docentes">—</span>
         </div>
 
         <div class="stat-card stat-salones">
@@ -127,7 +130,7 @@
             <span class="stat-numero" id="stat-salones">0</span>
             <span class="stat-label">Salones Activos</span>
           </div>
-          <span class="stat-delta positivo">&#8679; +1 este mes</span>
+          <span class="stat-delta neutro" id="delta-salones">—</span>
         </div>
 
         <div class="stat-card stat-matriculas">
@@ -136,7 +139,7 @@
             <span class="stat-numero" id="stat-matriculas">0</span>
             <span class="stat-label">Matrículas Pendientes</span>
           </div>
-          <span class="stat-delta alerta">&#9888; Requiere revisión</span>
+          <span class="stat-delta neutro" id="delta-matriculas">—</span>
         </div>
 
       </div>
@@ -151,56 +154,8 @@
             <a href="salones.html" class="link-ver-todo">Ver todos &#8594;</a>
           </div>
 
-          <div class="lista-salones">
-
-            <div class="salon-card">
-              <div class="salon-color rojo"></div>
-              <div class="salon-info">
-                <p class="salon-nombre">Salón Canadá</p>
-                <p class="salon-meta">Nivel A1 &bull; Lun–Jue 8:00–12:00</p>
-              </div>
-              <div class="salon-derecha">
-                <span class="salon-alumnos">10 alumnos</span>
-                <span class="badge-estado activo">Activo</span>
-              </div>
-            </div>
-
-            <div class="salon-card">
-              <div class="salon-color azul"></div>
-              <div class="salon-info">
-                <p class="salon-nombre">Salón Nueva Zelanda</p>
-                <p class="salon-meta">Nivel B2 &bull; Lun–Jue 14:00–18:00</p>
-              </div>
-              <div class="salon-derecha">
-                <span class="salon-alumnos">12 alumnos</span>
-                <span class="badge-estado activo">Activo</span>
-              </div>
-            </div>
-
-            <div class="salon-card">
-              <div class="salon-color morado"></div>
-              <div class="salon-info">
-                <p class="salon-nombre">Salón Miami</p>
-                <p class="salon-meta">Nivel C1 &bull; Sáb 8:00–12:00</p>
-              </div>
-              <div class="salon-derecha">
-                <span class="salon-alumnos">8 alumnos</span>
-                <span class="badge-estado activo">Activo</span>
-              </div>
-            </div>
-
-            <div class="salon-card">
-              <div class="salon-color amarillo"></div>
-              <div class="salon-info">
-                <p class="salon-nombre">Salón Londres</p>
-                <p class="salon-meta">Nivel B1 &bull; Lun–Jue 18:00–20:00</p>
-              </div>
-              <div class="salon-derecha">
-                <span class="salon-alumnos">9 alumnos</span>
-                <span class="badge-estado en-revision">En revisión</span>
-              </div>
-            </div>
-
+          <div class="lista-salones" id="lista-salones">
+            <p style="padding:24px;text-align:center;">Cargando salones...</p>
           </div>
         </section>
 
@@ -208,56 +163,11 @@
         <section class="card-seccion">
           <div class="card-header">
             <h2>Actividad Reciente</h2>
-            <span class="badge-conteo" id="badge-actividad">Hoy</span>
+            <span class="badge-conteo" id="badge-actividad">Reciente</span>
           </div>
 
           <div class="lista-actividad" id="lista-actividad">
-
-            <div class="actividad-item">
-              <div class="actividad-icono icono-alta">&#127891;</div>
-              <div class="actividad-detalle">
-                <p class="actividad-texto">Nueva matrícula registrada — <strong>Laura Gómez</strong></p>
-                <span class="actividad-hora">Hace 15 min</span>
-              </div>
-              <span class="actividad-badge badge-matricula">Matrícula</span>
-            </div>
-
-            <div class="actividad-item">
-              <div class="actividad-icono icono-media">&#128104;&#8205;&#127979;</div>
-              <div class="actividad-detalle">
-                <p class="actividad-texto">Docente <strong>Prof. Ramírez</strong> ingresó notas del ciclo 2</p>
-                <span class="actividad-hora">Hace 1 hora</span>
-              </div>
-              <span class="actividad-badge badge-nota">Notas</span>
-            </div>
-
-            <div class="actividad-item">
-              <div class="actividad-icono icono-alta">&#128203;</div>
-              <div class="actividad-detalle">
-                <p class="actividad-texto">Pago confirmado — matrícula <strong>AL-2026-00048</strong></p>
-                <span class="actividad-hora">Hace 2 horas</span>
-              </div>
-              <span class="actividad-badge badge-pago">Pago</span>
-            </div>
-
-            <div class="actividad-item">
-              <div class="actividad-icono icono-baja">&#128198;</div>
-              <div class="actividad-detalle">
-                <p class="actividad-texto">Salón <strong>Londres</strong> marcado en revisión</p>
-                <span class="actividad-hora">Hace 3 horas</span>
-              </div>
-              <span class="actividad-badge badge-salon">Salón</span>
-            </div>
-
-            <div class="actividad-item">
-              <div class="actividad-icono icono-media">&#127891;</div>
-              <div class="actividad-detalle">
-                <p class="actividad-texto">Alumno <strong>Carlos Ríos</strong> cambió de nivel A1 → A2</p>
-                <span class="actividad-hora">Hace 5 horas</span>
-              </div>
-              <span class="actividad-badge badge-matricula">Alumno</span>
-            </div>
-
+            <p style="padding:24px;text-align:center;">Cargando actividad...</p>
           </div>
         </section>
 
@@ -278,77 +188,13 @@
                 <th>Estudiante</th>
                 <th>Nivel</th>
                 <th>Salón</th>
-                <th>Método de Pago</th>
                 <th>Fecha</th>
                 <th>Estado</th>
                 <th>Acción</th>
               </tr>
             </thead>
             <tbody id="tbody-matriculas">
-
-              <tr class="fila-matricula">
-                <td class="td-codigo">AL-2026-00051</td>
-                <td>
-                  <div class="alumno-info">
-                    <div class="avatar-mini">S</div>
-                    Sofía Torres
-                  </div>
-                </td>
-                <td>A1</td>
-                <td>Canadá</td>
-                <td><span class="metodo-pago pse">PSE</span></td>
-                <td>28 Abr 2026</td>
-                <td><span class="badge-estado pendiente">Pendiente</span></td>
-                <td>
-                  <div class="acciones-fila">
-                    <button class="btn-aprobar" data-id="51">Aprobar</button>
-                    <button class="btn-rechazar" data-id="51">Rechazar</button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr class="fila-matricula">
-                <td class="td-codigo">AL-2026-00052</td>
-                <td>
-                  <div class="alumno-info">
-                    <div class="avatar-mini">J</div>
-                    Juan Martínez
-                  </div>
-                </td>
-                <td>B1</td>
-                <td>Londres</td>
-                <td><span class="metodo-pago transferencia">Transferencia</span></td>
-                <td>28 Abr 2026</td>
-                <td><span class="badge-estado pendiente">Pendiente</span></td>
-                <td>
-                  <div class="acciones-fila">
-                    <button class="btn-aprobar" data-id="52">Aprobar</button>
-                    <button class="btn-rechazar" data-id="52">Rechazar</button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr class="fila-matricula">
-                <td class="td-codigo">AL-2026-00053</td>
-                <td>
-                  <div class="alumno-info">
-                    <div class="avatar-mini">V</div>
-                    Valentina Cruz
-                  </div>
-                </td>
-                <td>C1</td>
-                <td>Miami</td>
-                <td><span class="metodo-pago tarjeta">Tarjeta</span></td>
-                <td>27 Abr 2026</td>
-                <td><span class="badge-estado pendiente">Pendiente</span></td>
-                <td>
-                  <div class="acciones-fila">
-                    <button class="btn-aprobar" data-id="53">Aprobar</button>
-                    <button class="btn-rechazar" data-id="53">Rechazar</button>
-                  </div>
-                </td>
-              </tr>
-
+              <tr><td colspan="7" style="padding:24px;text-align:center;">Cargando matrículas...</td></tr>
             </tbody>
           </table>
         </div>

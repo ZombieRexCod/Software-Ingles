@@ -8,7 +8,27 @@ const btnSubmit  = document.getElementById('btn-submit');
 const alerta     = document.getElementById('alerta-global');
 const inputPass  = document.getElementById('contrasena');
 const togglePass = document.getElementById('toggle-pass');
-const API_URL = window.location.origin + '/api'; 'window.location.origin'
+const API_URL = window.location.origin + '/api';
+
+// ── VOLVER A LA INSCRIPCIÓN ────────────────────────────────
+// inscripcion.html manda a login.html?volver=inscripcion. Solo se aceptan
+// destinos de esta lista (así nadie puede redirigir a un sitio externo).
+const DESTINOS_VOLVER = { inscripcion: '../admisiones/inscripcion.html' };
+const volver = new URLSearchParams(window.location.search).get('volver');
+const volverValido = Object.prototype.hasOwnProperty.call(DESTINOS_VOLVER, volver);
+
+if (volverValido) {
+  // Quien viene a inscribirse es estudiante: dejamos el rol ya elegido
+  document.getElementById('rol').value = 'estudiante';
+  // Si aún no tiene cuenta, el enlace a registro conserva el "volver"
+  const enlaceRegistro = document.querySelector('a[href="registro.html"]');
+  if (enlaceRegistro) enlaceRegistro.href = 'registro.html?volver=' + volver;
+}
+
+// Función aparte para poder probar la redirección
+function redirigir(url) {
+  window.location.href = url;
+}
 
 // 1. MOSTRAR / OCULTAR CONTRASEÑA
 togglePass.addEventListener('click', function () {
@@ -104,7 +124,10 @@ form.addEventListener('submit', async function (e) {
         docente:    '../docentes/inicio.html',
         admin:      '../admin/inicio.html'
       };
-      window.location.href = destinos[rol.value] || '../index.html';
+      let destino = destinos[rol.value] || '../index.html';
+      // Si venía de la inscripción, el estudiante regresa a continuar
+      if (volverValido && rol.value === 'estudiante') destino = DESTINOS_VOLVER[volver];
+      redirigir(destino);
     }, 1500);
 
   } catch (error) {

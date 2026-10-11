@@ -4,101 +4,213 @@
    Ubicación: assets/js/notas.js
 ============================================================ */
 
-// ── 1. CARGAR NOMBRE DESDE sessionStorage ──────────────────
-const nombre = sessionStorage.getItem('nombre') || 'Estudiante';
+const API = window.location.origin + '/api';
+
+// ── 1. VERIFICAR SESIÓN ─────────────────────────────────────
+const token = sessionStorage.getItem('token');
+const rol   = sessionStorage.getItem('rol');
+
+if (!token || rol !== 'estudiante') {
+  window.location.href = '../auth/login.html';
+}
+
+// ── 2. NOMBRE Y AVATAR ──────────────────────────────────────
+const nombre    = sessionStorage.getItem('nombre') || 'Estudiante';
 const navNombre = document.getElementById('nav-nombre');
 const navAvatar = document.getElementById('nav-avatar');
 if (navNombre) navNombre.textContent = nombre;
 if (navAvatar) navAvatar.textContent = nombre.charAt(0).toUpperCase();
 
-// ── 2. CERRAR SESIÓN ────────────────────────────────────────
+// ── 3. CERRAR SESIÓN ────────────────────────────────────────
 document.querySelector('.btn-cerrar').addEventListener('click', function (e) {
   e.preventDefault();
   sessionStorage.clear();
   window.location.href = '../auth/login.html';
 });
 
-// ── 3. ANIMAR BARRAS DE PROGRESO AL CARGAR ─────────────────
-// Las barras tienen el width en el HTML como estilo inline,
-// pero arrancamos desde 0 y animamos al entrar al viewport
-const barras = document.querySelectorAll('.ciclo-barra');
-const targetWidths = [];
-
-// Guardar el ancho destino y resetear a 0
-barras.forEach(function (barra) {
-  targetWidths.push(barra.style.width);
-  barra.style.width = '0%';
-});
-
-const observadorBarras = new IntersectionObserver(function (entradas) {
-  entradas.forEach(function (entrada) {
-    if (entrada.isIntersecting) {
-      const idx = Array.from(barras).indexOf(entrada.target);
-      setTimeout(function () {
-        entrada.target.style.width = targetWidths[idx];
-      }, idx * 150);
-      observadorBarras.unobserve(entrada.target);
-    }
+// ── 4. HELPER PARA LA API ───────────────────────────────────
+async function apiFetch(ruta) {
+  const respuesta = await fetch(API + ruta, {
+    headers: { 'Authorization': 'Bearer ' + token }
   });
-}, { threshold: 0.3 });
-
-barras.forEach(barra => observadorBarras.observe(barra));
-
-// ── 4. ANIMACIÓN ENTRADA TARJETAS DE CICLOS ─────────────────
-const cicloCards = document.querySelectorAll('.ciclo-card');
-
-const observadorCards = new IntersectionObserver(function (entradas) {
-  entradas.forEach(function (entrada) {
-    if (entrada.isIntersecting) {
-      entrada.target.style.opacity   = '1';
-      entrada.target.style.transform = 'translateY(0)';
-      observadorCards.unobserve(entrada.target);
-    }
-  });
-}, { threshold: 0.1 });
-
-cicloCards.forEach(function (card, i) {
-  card.style.opacity   = '0';
-  card.style.transform = 'translateY(16px)';
-  card.style.transition = 'opacity 0.4s ease ' + (i * 0.1) + 's, transform 0.4s ease ' + (i * 0.1) + 's';
-  observadorCards.observe(card);
-});
-
-// ── 5. FILTRO POR CICLO ─────────────────────────────────────
-const btnsFiltro = document.querySelectorAll('.btn-filtro');
-const filas      = document.querySelectorAll('#tbody-historial tr');
-
-btnsFiltro.forEach(function (btn) {
-  btn.addEventListener('click', function () {
-
-    // Activar botón
-    btnsFiltro.forEach(b => b.classList.remove('activo'));
-    this.classList.add('activo');
-
-    const cicloFiltro = this.getAttribute('data-ciclo');
-
-    filas.forEach(function (fila) {
-      const filaCiclo = fila.getAttribute('data-ciclo');
-      if (cicloFiltro === 'todos' || filaCiclo === cicloFiltro) {
-        fila.classList.remove('fila-oculta');
-      } else {
-        fila.classList.add('fila-oculta');
-      }
-    });
-  });
-});
-
-// ── 6. CALCULAR Y MOSTRAR PROMEDIO GENERAL ─────────────────
-const notas = [4.5, 3.9, 4.8]; // Ciclos completados
-const promedio = (notas.reduce((a, b) => a + b, 0) / notas.length).toFixed(1);
-const promedioEl = document.getElementById('promedio-general');
-if (promedioEl) promedioEl.textContent = promedio;
-
-// Color del promedio según valor
-if (parseFloat(promedio) >= 4.5) {
-  promedioEl.style.color = '#27AE60';
-} else if (parseFloat(promedio) >= 3.5) {
-  promedioEl.style.color = '#F39C12';
-} else {
-  promedioEl.style.color = '#C0392B';
+  if (respuesta.status === 401) {
+    sessionStorage.clear();
+    window.location.href = '../auth/login.html';
+    return null;
+  }
+  return respuesta.json();
 }
+
+// ── 5. UTILIDADES ───────────────────────────────────────────
+const TOTAL_CICLOS = 4;
+
+function crear(tag, clase, texto) {
+  const el = document.createElement(tag);
+  if (clase) el.className = clase;
+  if (texto !== undefined) el.textContent = texto;
+  return el;
+}
+
+// Devuelve un número o null (la BD puede mandar null o texto)
+function num(valor) {
+  const n = parseFloat(valor);
+  return isNaN(n) ? null : n;
+}
+
+function fmtNota(valor) {
+  const n = num(valor);
+  return n === null ? '—' : n.toFixed(1);
+}
+
+function claseNota(valor) {
+  const n = num(valor);
+  if (n === null) return 'nota-pendiente';
+  return n >= 4 ? 'nota-alta' : 'nota-media';
+}
+
+function mayuscula(texto) {
+  const t = String(texto || '');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+// ── 6. ESTADO ───────────────────────────────────────────────
+let notasPorCiclo = {};   // { 1: {...}, 2: {...} }
+let filtroActual  = 'todos';
+
+// ── 7. TARJETAS DE CICLOS ───────────────────────────────────
+function pintarCiclos() {
+  const grid = document.getElementById('grid-ciclos');
+  grid.innerHTML = '';
+
+  for (let c = 1; c <= TOTAL_CICLOS; c++) {
+    const n = notasPorCiclo[c];
+    const promedio = n ? num(n.promedio) : null;
+    const tiene = promedio !== null;
+
+    const card = crear('div', 'ciclo-card' + (tiene ? '' : ' ciclo-pendiente'));
+
+    const header = crear('div', 'ciclo-header');
+    header.appendChild(crear('span', 'ciclo-label', 'Ciclo ' + c));
+    const aprobado = n && n.estado === 'aprobado';
+    header.appendChild(crear('span',
+      'ciclo-estado ' + (aprobado ? 'completado' : 'pendiente'),
+      tiene ? mayuscula(n.estado) : 'Pendiente'));
+    card.appendChild(header);
+
+    card.appendChild(crear('p', 'ciclo-nota' + (tiene ? '' : ' ciclo-nota-gris'), fmtNota(promedio)));
+
+    const examen = crear('p', 'ciclo-examen', 'Examen Final: ');
+    const examenNota = n && num(n.nota_examen_final) !== null;
+    examen.appendChild(crear('strong', '', examenNota ? fmtNota(n.nota_examen_final) : 'Próximamente'));
+    card.appendChild(examen);
+
+    const wrap = crear('div', 'ciclo-barra-wrap');
+    const barra = crear('div', 'ciclo-barra');
+    barra.style.width = (tiene ? Math.min(100, promedio / 5 * 100) : 0) + '%';
+    wrap.appendChild(barra);
+    card.appendChild(wrap);
+
+    grid.appendChild(card);
+  }
+}
+
+// ── 8. PROMEDIO GENERAL Y ENCABEZADO ────────────────────────
+function pintarResumen(notas) {
+  const valores = notas.map(function (n) { return num(n.promedio); })
+                       .filter(function (v) { return v !== null; });
+  const prom = valores.length
+    ? (valores.reduce(function (a, b) { return a + b; }, 0) / valores.length).toFixed(1)
+    : '—';
+  document.getElementById('promedio-general').textContent = prom;
+
+  const sub = document.getElementById('texto-subtitulo');
+  sub.textContent = notas.length
+    ? notas[0].salon + '  ·  ' + notas.length + ' de ' + TOTAL_CICLOS + ' ciclos con nota'
+    : 'Aún no tienes notas registradas';
+}
+
+// ── 9. HISTORIAL ────────────────────────────────────────────
+function filaHistorial(ciclo, actividad, valor, estadoTexto, estadoClase) {
+  const tr = crear('tr');
+  tr.dataset.ciclo = ciclo;
+  tr.appendChild(crear('td', '', actividad));
+  tr.appendChild(crear('td', '', 'Ciclo ' + ciclo));
+  const tdNota = crear('td');
+  tdNota.appendChild(crear('span', 'nota-badge ' + claseNota(valor), fmtNota(valor)));
+  tr.appendChild(tdNota);
+  const tdEstado = crear('td');
+  tdEstado.appendChild(crear('span', 'badge ' + estadoClase, estadoTexto));
+  tr.appendChild(tdEstado);
+  return tr;
+}
+
+function pintarHistorial() {
+  const tbody = document.getElementById('tbody-historial');
+  tbody.innerHTML = '';
+
+  const ciclos = Object.keys(notasPorCiclo).map(Number).sort(function (a, b) { return a - b; })
+    .filter(function (c) { return filtroActual === 'todos' || String(c) === filtroActual; });
+
+  if (ciclos.length === 0) {
+    const tr = crear('tr');
+    const td = crear('td', '',
+      filtroActual === 'todos'
+        ? 'Aún no tienes notas registradas.'
+        : 'No hay notas para el ciclo ' + filtroActual + '.');
+    td.colSpan = 4;
+    td.style.padding = '24px';
+    td.style.textAlign = 'center';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  ciclos.forEach(function (c) {
+    const n = notasPorCiclo[c];
+    const aprobado = n.estado === 'aprobado';
+    const texto = mayuscula(n.estado || 'pendiente');
+    const clase = aprobado ? 'badge-aprobado' : 'badge-pendiente';
+    tbody.appendChild(filaHistorial(c, 'Nota del ciclo', n.nota_ciclo, texto, clase));
+    tbody.appendChild(filaHistorial(c, 'Examen final', n.nota_examen_final, texto, clase));
+  });
+}
+
+// ── 10. FILTRO POR CICLO ────────────────────────────────────
+document.querySelectorAll('.btn-filtro').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.btn-filtro').forEach(function (b) { b.classList.remove('activo'); });
+    btn.classList.add('activo');
+    filtroActual = btn.dataset.ciclo;
+    pintarHistorial();
+  });
+});
+
+// ── 11. ARRANCAR ────────────────────────────────────────────
+async function cargarNotas() {
+  let notas = [];
+  let salon = null;
+
+  try {
+    const resultados = await Promise.all([
+      apiFetch('/alumnos/notas'),
+      apiFetch('/alumnos/horario')
+    ]);
+    notas = (resultados[0] && resultados[0].notas) ? resultados[0].notas : [];
+    const horario = (resultados[1] && resultados[1].horario) ? resultados[1].horario : [];
+    if (horario.length) salon = horario[0].salon;
+  } catch (err) {
+    console.error('Error al cargar las notas:', err);
+  }
+
+  notasPorCiclo = {};
+  notas.forEach(function (n) { notasPorCiclo[n.numero_ciclo] = n; });
+
+  const enlace = document.querySelector('.clase-item a');
+  if (enlace) enlace.textContent = salon || 'Sin salón asignado';
+
+  pintarResumen(notas);
+  pintarCiclos();
+  pintarHistorial();
+}
+
+cargarNotas();

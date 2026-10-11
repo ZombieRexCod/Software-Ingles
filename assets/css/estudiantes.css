@@ -6,27 +6,6 @@
    (Depende de index.css para variables, navbar y footer)
 ============================================================ */
 
-/* Tipografía propia de esta página: fuentes web más pulidas
-   que las del sistema, aplicadas solo aquí mediante la clase
-   .pagina-estudiantes en <body> (no afecta al resto del sitio) */
-body.pagina-estudiantes {
-  --font-titulo: 'Playfair Display', Georgia, serif;
-  --font-cuerpo: 'Poppins', 'Segoe UI', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-body.pagina-estudiantes p {
-  line-height: 1.65;
-}
-
-body.pagina-estudiantes h1,
-body.pagina-estudiantes h2,
-body.pagina-estudiantes h3 {
-  letter-spacing: -0.01em;
-}
-
 /* ============================================================
    HERO
 ============================================================ */

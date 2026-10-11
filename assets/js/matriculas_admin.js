@@ -4,21 +4,23 @@
    Ubicación: assets/js/matriculas_admin.js
 ============================================================ */
 
-// ── 1. CARGAR NOMBRE DESDE sessionStorage ──────────────────
+const API = window.location.origin + '/api';
+
+// ── 1. VERIFICAR SESIÓN ─────────────────────────────────────
+const token = sessionStorage.getItem('token');
+const rol   = sessionStorage.getItem('rol');
+const sesionValida = !!token && rol === 'admin';
+
+if (!sesionValida) {
+  window.location.href = '../auth/login.html';
+}
+
+// ── 2. NOMBRE Y AVATAR ──────────────────────────────────────
 const nombre    = sessionStorage.getItem('nombre') || 'Administrador';
 const navNombre = document.getElementById('nav-nombre');
 const navAvatar = document.getElementById('nav-avatar');
 if (navNombre) navNombre.textContent = nombre;
 if (navAvatar) navAvatar.textContent = nombre.charAt(0).toUpperCase();
-
-// ── 2. FECHA ACTUAL ─────────────────────────────────────────
-const textFecha = document.getElementById('texto-fecha');
-if (textFecha) {
-  const hoy = new Date();
-  const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  const fechaStr = hoy.toLocaleDateString('es-CO', opciones);
-  textFecha.textContent = fechaStr.charAt(0).toUpperCase() + fechaStr.slice(1);
-}
 
 // ── 3. CERRAR SESIÓN ────────────────────────────────────────
 document.querySelector('.btn-cerrar').addEventListener('click', function (e) {
@@ -27,356 +29,560 @@ document.querySelector('.btn-cerrar').addEventListener('click', function (e) {
   window.location.href = '../auth/login.html';
 });
 
-// ── 4. DATOS DE MATRÍCULAS ──────────────────────────────────
-let matriculas = [
-  { id: 51, codigo: 'AL-2026-00051', nombre: 'Sofía Torres',     inicial: 'S', nivel: 'A1', salon: 'Canadá',        metodo: 'pse',           metodoTxt: 'PSE',           fecha: '28 Abr 2026', estado: 'pendiente' },
-  { id: 52, codigo: 'AL-2026-00052', nombre: 'Juan Martínez',    inicial: 'J', nivel: 'B1', salon: 'Londres',       metodo: 'transferencia', metodoTxt: 'Transferencia', fecha: '28 Abr 2026', estado: 'pendiente' },
-  { id: 53, codigo: 'AL-2026-00053', nombre: 'Valentina Cruz',   inicial: 'V', nivel: 'C1', salon: 'Miami',         metodo: 'tarjeta',       metodoTxt: 'Tarjeta',       fecha: '27 Abr 2026', estado: 'pendiente' },
-  { id: 48, codigo: 'AL-2026-00048', nombre: 'Laura Gómez',      inicial: 'L', nivel: 'A1', salon: 'Canadá',        metodo: 'pse',           metodoTxt: 'PSE',           fecha: '25 Abr 2026', estado: 'aprobado'  },
-  { id: 47, codigo: 'AL-2026-00047', nombre: 'Carlos Ríos',      inicial: 'C', nivel: 'A2', salon: 'Nueva Zelanda', metodo: 'transferencia', metodoTxt: 'Transferencia', fecha: '24 Abr 2026', estado: 'aprobado'  },
-  { id: 46, codigo: 'AL-2026-00046', nombre: 'Andrea Salazar',   inicial: 'A', nivel: 'B2', salon: 'Nueva Zelanda', metodo: 'tarjeta',       metodoTxt: 'Tarjeta',       fecha: '23 Abr 2026', estado: 'rechazado' },
-  { id: 45, codigo: 'AL-2026-00045', nombre: 'Miguel Ángel Paz', inicial: 'M', nivel: 'B1', salon: 'Londres',       metodo: 'pse',           metodoTxt: 'PSE',           fecha: '22 Abr 2026', estado: 'aprobado'  },
-  { id: 44, codigo: 'AL-2026-00044', nombre: 'Daniela Ortiz',    inicial: 'D', nivel: 'C1', salon: 'Miami',         metodo: 'transferencia', metodoTxt: 'Transferencia', fecha: '21 Abr 2026', estado: 'aprobado'  },
-  { id: 43, codigo: 'AL-2026-00043', nombre: 'Esteban Rojas',    inicial: 'E', nivel: 'A1', salon: 'Canadá',        metodo: 'tarjeta',       metodoTxt: 'Tarjeta',       fecha: '20 Abr 2026', estado: 'pendiente' },
-  { id: 42, codigo: 'AL-2026-00042', nombre: 'Isabella Herrera', inicial: 'I', nivel: 'B1', salon: 'Londres',       metodo: 'pse',           metodoTxt: 'PSE',           fecha: '19 Abr 2026', estado: 'rechazado' },
-  { id: 41, codigo: 'AL-2026-00041', nombre: 'Santiago Vargas',  inicial: 'S', nivel: 'A2', salon: 'Nueva Zelanda', metodo: 'transferencia', metodoTxt: 'Transferencia', fecha: '18 Abr 2026', estado: 'aprobado'  },
-  { id: 40, codigo: 'AL-2026-00040', nombre: 'Camila Reyes',     inicial: 'C', nivel: 'C1', salon: 'Miami',         metodo: 'tarjeta',       metodoTxt: 'Tarjeta',       fecha: '17 Abr 2026', estado: 'aprobado'  },
-];
+// ── 4. HELPER PARA LA API (GET, POST, PUT) ──────────────────
+// Devuelve { ok, datos } o null si el token venció.
+async function apiFetch(ruta, opciones) {
+  const config = opciones || {};
+  const headers = { 'Authorization': 'Bearer ' + token };
+  if (config.body) headers['Content-Type'] = 'application/json';
 
-let idSiguiente = 54;
-
-// ── 5. ESTADO DE FILTROS Y PAGINACIÓN ───────────────────────
-const filtros = { busqueda: '', estado: 'todos', nivel: 'todos', salon: 'todos' };
-const porPagina = 6;
-let paginaActual = 1;
-
-const inputBusqueda   = document.getElementById('input-busqueda');
-const selectEstado    = document.getElementById('filtro-estado');
-const selectNivel     = document.getElementById('filtro-nivel');
-const selectSalon     = document.getElementById('filtro-salon');
-const btnResetFiltros = document.getElementById('btn-reset-filtros');
-const tbody           = document.getElementById('tbody-matriculas');
-const infoResultados  = document.getElementById('info-resultados');
-const paginacionEl    = document.getElementById('paginacion');
-
-function normalizar(txt) {
-  return txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-function matriculasFiltradas() {
-  return matriculas.filter(function (m) {
-    const coincideBusqueda = filtros.busqueda === '' ||
-      normalizar(m.nombre).includes(normalizar(filtros.busqueda)) ||
-      normalizar(m.codigo).includes(normalizar(filtros.busqueda));
-    const coincideEstado = filtros.estado === 'todos' || m.estado === filtros.estado;
-    const coincideNivel  = filtros.nivel  === 'todos' || m.nivel  === filtros.nivel;
-    const coincideSalon  = filtros.salon  === 'todos' || m.salon  === filtros.salon;
-    return coincideBusqueda && coincideEstado && coincideNivel && coincideSalon;
+  const respuesta = await fetch(API + ruta, {
+    method: config.method || 'GET',
+    headers: headers,
+    body: config.body ? JSON.stringify(config.body) : undefined
   });
-}
 
-// ── 6. RENDER DE TABLA ──────────────────────────────────────
-function crearFilaHTML(m) {
-  const disabled = m.estado !== 'pendiente' ? 'disabled' : '';
-  return (
-    '<tr class="fila-matricula" data-id="' + m.id + '">' +
-      '<td class="td-codigo">' + m.codigo + '</td>' +
-      '<td><div class="alumno-info"><div class="avatar-mini">' + m.inicial + '</div>' + m.nombre + '</div></td>' +
-      '<td>' + m.nivel + '</td>' +
-      '<td>' + m.salon + '</td>' +
-      '<td><span class="metodo-pago ' + m.metodo + '">' + m.metodoTxt + '</span></td>' +
-      '<td>' + m.fecha + '</td>' +
-      '<td><span class="badge-estado ' + m.estado + '">' + capitalizar(m.estado) + '</span></td>' +
-      '<td><div class="acciones-fila">' +
-        '<button class="btn-aprobar" data-id="' + m.id + '" ' + disabled + '>Aprobar</button>' +
-        '<button class="btn-rechazar" data-id="' + m.id + '" ' + disabled + '>Rechazar</button>' +
-      '</div></td>' +
-    '</tr>'
-  );
-}
-
-function capitalizar(txt) {
-  return txt.charAt(0).toUpperCase() + txt.slice(1);
-}
-
-function renderTabla() {
-  const filtradas = matriculasFiltradas();
-  const totalPaginas = Math.max(1, Math.ceil(filtradas.length / porPagina));
-  if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-
-  const inicio = (paginaActual - 1) * porPagina;
-  const pagina = filtradas.slice(inicio, inicio + porPagina);
-
-  if (pagina.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="estado-vacio">' +
-      '<span class="icono-vacio">&#128203;</span>' +
-      '<p>No se encontraron matrículas con los filtros seleccionados</p>' +
-      '</div></td></tr>';
-  } else {
-    tbody.innerHTML = pagina.map(crearFilaHTML).join('');
+  if (respuesta.status === 401) {
+    sessionStorage.clear();
+    window.location.href = '../auth/login.html';
+    return null;
   }
 
-  if (infoResultados) {
-    infoResultados.innerHTML = 'Mostrando <strong>' + pagina.length + '</strong> de <strong>' + filtradas.length + '</strong> matrículas';
-  }
-
-  renderPaginacion(totalPaginas);
-  animarFilas();
-  actualizarStats();
+  let datos = null;
+  try { datos = await respuesta.json(); } catch (err) { /* sin cuerpo JSON */ }
+  return { ok: respuesta.ok, datos: datos };
 }
 
-function renderPaginacion(totalPaginas) {
-  if (!paginacionEl) return;
-  let html = '';
-  html += '<button class="btn-pagina" data-accion="prev" ' + (paginaActual === 1 ? 'disabled' : '') + '>&#8592;</button>';
-  for (let i = 1; i <= totalPaginas; i++) {
-    html += '<button class="btn-pagina ' + (i === paginaActual ? 'activo' : '') + '" data-pagina="' + i + '">' + i + '</button>';
-  }
-  html += '<button class="btn-pagina" data-accion="next" ' + (paginaActual === totalPaginas ? 'disabled' : '') + '>&#8594;</button>';
-  paginacionEl.innerHTML = html;
+// ── 5. UTILIDADES ───────────────────────────────────────────
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const POR_PAGINA = 10;
+
+function crear(tag, clase, texto) {
+  const el = document.createElement(tag);
+  if (clase) el.className = clase;
+  if (texto !== undefined) el.textContent = texto;
+  return el;
 }
 
-function animarFilas() {
-  const filas = document.querySelectorAll('.fila-matricula');
-  const obsFilas = new IntersectionObserver(function (entradas) {
-    entradas.forEach(function (entrada) {
-      if (entrada.isIntersecting) {
-        entrada.target.style.opacity   = '1';
-        entrada.target.style.transform = 'translateY(0)';
-        obsFilas.unobserve(entrada.target);
-      }
-    });
-  }, { threshold: 0.05 });
-
-  filas.forEach(function (fila, i) {
-    fila.style.opacity    = '0';
-    fila.style.transform  = 'translateY(10px)';
-    fila.style.transition = 'opacity 0.3s ease ' + (i * 0.06) + 's, transform 0.3s ease ' + (i * 0.06) + 's';
-    obsFilas.observe(fila);
-  });
-}
-
-// ── 7. STATS ─────────────────────────────────────────────────
-function actualizarStats() {
-  const total      = matriculas.length;
-  const pendientes = matriculas.filter(function (m) { return m.estado === 'pendiente'; }).length;
-  const aprobadas  = matriculas.filter(function (m) { return m.estado === 'aprobado';  }).length;
-  const rechazadas = matriculas.filter(function (m) { return m.estado === 'rechazado'; }).length;
-
-  setStat('stat-total', total);
-  setStat('stat-pendientes', pendientes);
-  setStat('stat-aprobadas', aprobadas);
-  setStat('stat-rechazadas', rechazadas);
-}
-
-function setStat(id, valor) {
+function setTexto(id, texto) {
   const el = document.getElementById(id);
-  if (el) el.textContent = valor;
+  if (el) el.textContent = texto;
 }
 
-// ── 8. EVENTOS DE FILTROS ───────────────────────────────────
-if (inputBusqueda) {
-  inputBusqueda.addEventListener('input', function () {
-    filtros.busqueda = this.value;
-    paginaActual = 1;
-    renderTabla();
-  });
-}
-if (selectEstado) {
-  selectEstado.addEventListener('change', function () {
-    filtros.estado = this.value;
-    paginaActual = 1;
-    renderTabla();
-  });
-}
-if (selectNivel) {
-  selectNivel.addEventListener('change', function () {
-    filtros.nivel = this.value;
-    paginaActual = 1;
-    renderTabla();
-  });
-}
-if (selectSalon) {
-  selectSalon.addEventListener('change', function () {
-    filtros.salon = this.value;
-    paginaActual = 1;
-    renderTabla();
-  });
-}
-if (btnResetFiltros) {
-  btnResetFiltros.addEventListener('click', function () {
-    filtros.busqueda = ''; filtros.estado = 'todos'; filtros.nivel = 'todos'; filtros.salon = 'todos';
-    if (inputBusqueda) inputBusqueda.value = '';
-    if (selectEstado)  selectEstado.value  = 'todos';
-    if (selectNivel)   selectNivel.value   = 'todos';
-    if (selectSalon)   selectSalon.value   = 'todos';
-    paginaActual = 1;
-    renderTabla();
-  });
+function mostrarAlerta(tipo, texto) {
+  const alerta = document.getElementById('alerta');
+  alerta.textContent = texto;
+  alerta.className = 'alerta ' + tipo + ' visible';
+  alerta.style.display = 'block';
 }
 
-if (paginacionEl) {
-  paginacionEl.addEventListener('click', function (e) {
-    const btn = e.target.closest('.btn-pagina');
-    if (!btn || btn.disabled) return;
-    const totalPaginas = Math.max(1, Math.ceil(matriculasFiltradas().length / porPagina));
-    if (btn.dataset.accion === 'prev') paginaActual = Math.max(1, paginaActual - 1);
-    else if (btn.dataset.accion === 'next') paginaActual = Math.min(totalPaginas, paginaActual + 1);
-    else if (btn.dataset.pagina) paginaActual = parseInt(btn.dataset.pagina, 10);
-    renderTabla();
-  });
+function inicial(texto) {
+  return String(texto || '?').trim().charAt(0).toUpperCase();
 }
 
-// ── 9. APROBAR / RECHAZAR (delegación de eventos) ───────────
-if (tbody) {
-  tbody.addEventListener('click', function (e) {
-    const btnAprobar  = e.target.closest('.btn-aprobar');
-    const btnRechazar = e.target.closest('.btn-rechazar');
-    if (!btnAprobar && !btnRechazar) return;
+function plural(n, singular, pluralTexto) {
+  return n + ' ' + (n === 1 ? singular : pluralTexto);
+}
 
-    const id = parseInt((btnAprobar || btnRechazar).dataset.id, 10);
-    const matricula = matriculas.find(function (m) { return m.id === id; });
-    if (!matricula) return;
+// "2026-10-08T00:00:00.000Z" -> "8 Oct 2026" (en UTC para que no se corra un día)
+function fmtFecha(valor) {
+  if (!valor) return '—';
+  const d = new Date(valor);
+  return d.getUTCDate() + ' ' + MESES[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+}
 
-    if (btnAprobar) {
-      matricula.estado = 'aprobado';
-      mostrarToast('Matrícula ' + matricula.codigo + ' aprobada correctamente');
-    } else {
-      matricula.estado = 'rechazado';
-      mostrarToast('Matrícula ' + matricula.codigo + ' rechazada', true);
+const formatoPesos = new Intl.NumberFormat('es-CO', {
+  style: 'currency', currency: 'COP', maximumFractionDigits: 0
+});
+
+// ── 6. ESTADO DE LA PÁGINA ──────────────────────────────────
+let matriculas = [];
+let salones = [];
+let estudiantes = [];
+let pagina = 1;
+
+// ── 7. CARGA DE DATOS ───────────────────────────────────────
+async function cargarMatriculas() {
+  const res = await apiFetch('/admin/matriculas');
+  if (res && res.ok && res.datos && Array.isArray(res.datos.matriculas)) {
+    matriculas = res.datos.matriculas;
+    return true;
+  }
+  mostrarAlerta('error', (res && res.datos && res.datos.mensaje) || 'No se pudieron cargar las matrículas.');
+  return false;
+}
+
+async function cargarEstudiantes() {
+  try {
+    const res = await apiFetch('/admin/estudiantes');
+    if (res && res.ok && res.datos && Array.isArray(res.datos.estudiantes)) {
+      estudiantes = res.datos.estudiantes;
     }
-    renderTabla();
+  } catch (err) {
+    console.error('Error al cargar los estudiantes:', err);
+  }
+}
+
+async function cargarSalones() {
+  try {
+    const res = await apiFetch('/admin/salones');
+    if (res && res.ok && res.datos && Array.isArray(res.datos.salones)) {
+      salones = res.datos.salones;
+    }
+  } catch (err) {
+    console.error('Error al cargar los salones:', err);
+  }
+}
+
+// El nivel no viene en la matrícula: se busca en el salón (nombre + año)
+function nivelDe(m) {
+  const salon = salones.find(function (s) { return s.nombre === m.salon && s.anno === m.anno; });
+  return salon ? salon.nivel : '—';
+}
+
+// ── 8. FECHA, TARJETAS Y FILTROS ────────────────────────────
+function pintarFecha() {
+  const texto = new Date().toLocaleDateString('es-CO', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  setTexto('texto-fecha', texto.charAt(0).toUpperCase() + texto.slice(1));
+}
+
+function pintarStats() {
+  const contar = function (estado) {
+    return matriculas.filter(function (m) { return m.estado === estado; }).length;
+  };
+  const pendientes = contar('pendiente');
+
+  setTexto('stat-total', matriculas.length);
+  setTexto('stat-pendientes', pendientes);
+  setTexto('stat-aprobadas', contar('activa'));
+  setTexto('stat-rechazadas', contar('cancelada'));
+
+  const delta = document.getElementById('delta-pendientes');
+  if (pendientes > 0) {
+    delta.textContent = '\u26A0 Requiere revisión';
+    delta.className = 'stat-delta alerta';
+  } else {
+    delta.textContent = 'Todo al día';
+    delta.className = 'stat-delta neutro';
+  }
+}
+
+function llenarFiltros() {
+  const selNivel = document.getElementById('filtro-nivel');
+  const selSalon = document.getElementById('filtro-salon');
+
+  const niveles = [];
+  const nombres = [];
+  salones.forEach(function (s) {
+    if (niveles.indexOf(s.nivel) === -1) niveles.push(s.nivel);
+    if (nombres.indexOf(s.nombre) === -1) nombres.push(s.nombre);
+  });
+
+  niveles.forEach(function (n) {
+    const op = crear('option', '', n);
+    op.value = n;
+    selNivel.appendChild(op);
+  });
+  nombres.forEach(function (n) {
+    const op = crear('option', '', n);
+    op.value = n;
+    selSalon.appendChild(op);
   });
 }
 
-// ── 10. MODAL NUEVA MATRÍCULA ───────────────────────────────
-const modalOverlay   = document.getElementById('modal-nueva-matricula');
-const btnAbrirModal  = document.getElementById('btn-abrir-modal');
-const btnCerrarModal = document.getElementById('btn-cerrar-modal');
-const btnCancelarModal = document.getElementById('btn-modal-cancelar');
-const formNuevaMatricula = document.getElementById('form-nueva-matricula');
+function filtrar() {
+  const texto = document.getElementById('input-busqueda').value.trim().toLowerCase().replace(/^#/, '');
+  const estado = document.getElementById('filtro-estado').value;
+  const nivel = document.getElementById('filtro-nivel').value;
+  const salon = document.getElementById('filtro-salon').value;
 
-function abrirModal() {
-  if (!modalOverlay) return;
-  modalOverlay.classList.add('abierto');
-}
-function cerrarModal() {
-  if (!modalOverlay) return;
-  modalOverlay.classList.remove('abierto');
-  if (formNuevaMatricula) formNuevaMatricula.reset();
-}
-
-if (btnAbrirModal)  btnAbrirModal.addEventListener('click', abrirModal);
-if (btnCerrarModal) btnCerrarModal.addEventListener('click', cerrarModal);
-if (btnCancelarModal) btnCancelarModal.addEventListener('click', cerrarModal);
-if (modalOverlay) {
-  modalOverlay.addEventListener('click', function (e) {
-    if (e.target === modalOverlay) cerrarModal();
-  });
-}
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('abierto')) cerrarModal();
-});
-
-if (formNuevaMatricula) {
-  formNuevaMatricula.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const nombreAlumno = document.getElementById('input-nombre-alumno').value.trim();
-    const nivel  = document.getElementById('select-nivel-modal').value;
-    const salon  = document.getElementById('select-salon-modal').value;
-    const metodo = document.getElementById('select-metodo-modal').value;
-
-    if (!nombreAlumno) return;
-
-    const metodosTxt = { pse: 'PSE', transferencia: 'Transferencia', tarjeta: 'Tarjeta' };
-    const hoy = new Date();
-    const fechaCorta = hoy.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })
-      .replace('.', '');
-
-    const nueva = {
-      id: idSiguiente++,
-      codigo: 'AL-2026-' + String(idSiguiente - 1).padStart(5, '0'),
-      nombre: nombreAlumno,
-      inicial: nombreAlumno.charAt(0).toUpperCase(),
-      nivel: nivel,
-      salon: salon,
-      metodo: metodo,
-      metodoTxt: metodosTxt[metodo] || metodo,
-      fecha: fechaCorta.charAt(0).toUpperCase() + fechaCorta.slice(1),
-      estado: 'pendiente'
-    };
-
-    matriculas.unshift(nueva);
-    paginaActual = 1;
-    filtros.busqueda = ''; filtros.estado = 'todos'; filtros.nivel = 'todos'; filtros.salon = 'todos';
-    if (inputBusqueda) inputBusqueda.value = '';
-    if (selectEstado)  selectEstado.value  = 'todos';
-    if (selectNivel)   selectNivel.value   = 'todos';
-    if (selectSalon)   selectSalon.value   = 'todos';
-
-    renderTabla();
-    cerrarModal();
-    mostrarToast('Matrícula ' + nueva.codigo + ' registrada correctamente');
+  return matriculas.filter(function (m) {
+    if (estado !== 'todos' && m.estado !== estado) return false;
+    if (nivel !== 'todos' && nivelDe(m) !== nivel) return false;
+    if (salon !== 'todos' && m.salon !== salon) return false;
+    if (texto) {
+      const paja = (String(m.estudiante) + ' ' + String(m.salon) + ' ' + m.id).toLowerCase();
+      if (paja.indexOf(texto) === -1) return false;
+    }
+    return true;
   });
 }
 
-// ── 11. ACCESOS RÁPIDOS SIDEBAR ─────────────────────────────
-const rutas = {
-  'sb-nuevo-alumno':  'alumnos.html',
-  'sb-nuevo-docente': 'docentes.html',
-  'sb-nuevo-salon':   'salones.html',
-};
+// ── 9. TABLA ────────────────────────────────────────────────
+function claseEstado(estado) {
+  if (estado === 'pendiente') return 'badge-estado pendiente';
+  if (estado === 'activa') return 'badge-estado aprobado activo';
+  return 'badge-estado rechazado';
+}
 
-Object.keys(rutas).forEach(function (id) {
-  const btn = document.getElementById(id);
-  if (btn) {
+function textoEstado(estado) {
+  if (estado === 'pendiente') return 'Pendiente';
+  if (estado === 'activa') return 'Activa';
+  return 'Cancelada';
+}
+
+function crearFila(m) {
+  const tr = crear('tr', 'fila-matricula');
+
+  tr.appendChild(crear('td', 'td-codigo', '#' + m.id));
+
+  const tdAlumno = crear('td');
+  const info = crear('div', 'alumno-info');
+  info.appendChild(crear('div', 'avatar-mini', inicial(m.estudiante)));
+  info.appendChild(document.createTextNode(m.estudiante));
+  tdAlumno.appendChild(info);
+  tr.appendChild(tdAlumno);
+
+  tr.appendChild(crear('td', '', nivelDe(m)));
+  tr.appendChild(crear('td', '', m.salon));
+
+  const saldo = Number(m.saldo_pendiente) || 0;
+  const tdSaldo = crear('td', '', saldo > 0 ? formatoPesos.format(saldo) : 'Pagada');
+  tdSaldo.title = 'Valor total: ' + formatoPesos.format(Number(m.valor_total) || 0) +
+                  ' \u00B7 Descuento: ' + formatoPesos.format(Number(m.descuento) || 0);
+  tr.appendChild(tdSaldo);
+
+  tr.appendChild(crear('td', '', fmtFecha(m.fecha_matricula)));
+
+  const tdEstado = crear('td');
+  tdEstado.appendChild(crear('span', claseEstado(m.estado), textoEstado(m.estado)));
+  tr.appendChild(tdEstado);
+
+  // Acciones según el estado actual
+  const tdAccion = crear('td');
+  const acciones = crear('div', 'acciones-fila');
+  const botones = [];
+
+  function agregarBoton(clase, texto, nuevoEstado) {
+    const btn = crear('button', clase, texto);
+    btn.addEventListener('click', function () { cambiarEstado(m, nuevoEstado, botones); });
+    botones.push(btn);
+    acciones.appendChild(btn);
+  }
+
+  if (m.estado === 'pendiente') {
+    agregarBoton('btn-aprobar', 'Aprobar', 'activa');
+    agregarBoton('btn-rechazar', 'Rechazar', 'cancelada');
+  } else if (m.estado === 'activa') {
+    agregarBoton('btn-rechazar', 'Cancelar', 'cancelada');
+  } else {
+    agregarBoton('btn-aprobar', 'Reactivar', 'activa');
+  }
+
+  // Registrar pago: solo si la matrícula no está cancelada y aún debe dinero
+  if (m.estado !== 'cancelada' && saldo > 0) {
+    const btnPago = crear('button', 'btn-aprobar', 'Registrar pago');
+    btnPago.addEventListener('click', function () { abrirModalPago(m); });
+    acciones.appendChild(btnPago);
+  }
+
+  tdAccion.appendChild(acciones);
+  tr.appendChild(tdAccion);
+
+  return tr;
+}
+
+function pintarTabla() {
+  const tbody = document.getElementById('tbody-matriculas');
+  tbody.innerHTML = '';
+
+  const filtradas = filtrar();
+  const total = filtradas.length;
+  const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+  if (pagina > paginas) pagina = paginas;
+
+  setTexto('badge-actividad', plural(total, 'resultado', 'resultados'));
+
+  if (total === 0) {
+    const tr = crear('tr');
+    const td = crear('td', '', matriculas.length === 0
+      ? 'Todavía no hay matrículas registradas.'
+      : 'No se encontraron matrículas con esos filtros.');
+    td.colSpan = 8;
+    td.style.padding = '24px';
+    td.style.textAlign = 'center';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    setTexto('info-resultados', '');
+    pintarPaginacion(1);
+    return;
+  }
+
+  const inicio = (pagina - 1) * POR_PAGINA;
+  const visibles = filtradas.slice(inicio, inicio + POR_PAGINA);
+  visibles.forEach(function (m) { tbody.appendChild(crearFila(m)); });
+
+  setTexto('info-resultados',
+    'Mostrando ' + (inicio + 1) + '\u2013' + (inicio + visibles.length) + ' de ' + plural(total, 'matrícula', 'matrículas'));
+  pintarPaginacion(paginas);
+}
+
+function pintarPaginacion(paginas) {
+  const cont = document.getElementById('paginacion');
+  cont.innerHTML = '';
+  if (paginas <= 1) return;
+
+  function boton(texto, destino, activo, desactivado) {
+    const btn = crear('button', 'btn-pagina' + (activo ? ' activo' : ''), texto);
+    btn.disabled = !!desactivado;
     btn.addEventListener('click', function () {
-      window.location.href = rutas[id];
+      pagina = destino;
+      pintarTabla();
     });
+    cont.appendChild(btn);
   }
+
+  boton('\u2039', pagina - 1, false, pagina === 1);
+  for (let p = 1; p <= paginas; p++) boton(String(p), p, p === pagina, false);
+  boton('\u203A', pagina + 1, false, pagina === paginas);
+}
+
+// ── 10. CAMBIAR ESTADO DE UNA MATRÍCULA ─────────────────────
+// Aprobar / Reactivar = "activa"; Rechazar / Cancelar = "cancelada"
+async function cambiarEstado(matricula, nuevoEstado, botones) {
+  if (nuevoEstado === 'cancelada' &&
+      !confirm('¿Cancelar la matrícula de ' + matricula.estudiante + ' en ' + matricula.salon + '?')) {
+    return;
+  }
+
+  botones.forEach(function (b) { b.disabled = true; });
+
+  try {
+    const res = await apiFetch('/admin/matriculas/' + matricula.id + '/estado', {
+      method: 'PUT',
+      body: { estado: nuevoEstado }
+    });
+
+    if (res && res.ok) {
+      await cargarMatriculas();
+      pintarStats();
+      pintarTabla();
+      mostrarAlerta('exito', nuevoEstado === 'activa'
+        ? 'Matrícula de ' + matricula.estudiante + ' activada.'
+        : 'Matrícula de ' + matricula.estudiante + ' cancelada.');
+    } else {
+      mostrarAlerta('error', (res && res.datos && res.datos.mensaje) || 'No se pudo actualizar la matrícula.');
+      botones.forEach(function (b) { b.disabled = false; });
+    }
+  } catch (err) {
+    console.error(err);
+    mostrarAlerta('error', 'No se pudo conectar con el servidor.');
+    botones.forEach(function (b) { b.disabled = false; });
+  }
+}
+
+// ── 10B. REGISTRAR PAGO (modal) ─────────────────────────────
+let matriculaPago = null;
+
+function abrirModalPago(m) {
+  matriculaPago = m;
+  const saldo = Number(m.saldo_pendiente) || 0;
+
+  setTexto('pago-estudiante', m.estudiante);
+  setTexto('pago-salon', m.salon);
+  setTexto('pago-saldo', formatoPesos.format(saldo));
+  setTexto('pago-error', '');
+
+  const inputMonto = document.getElementById('pago-monto');
+  inputMonto.value = '';
+  inputMonto.max = saldo;
+  document.getElementById('pago-metodo').value = '';
+  document.getElementById('pago-referencia').value = '';
+  document.getElementById('btn-guardar-pago').disabled = false;
+
+  document.getElementById('modal-pago').classList.add('abierto');
+  inputMonto.focus();
+}
+
+function cerrarModalPago() {
+  document.getElementById('modal-pago').classList.remove('abierto');
+  matriculaPago = null;
+}
+
+async function enviarPago(e) {
+  e.preventDefault();
+  if (!matriculaPago) return;
+
+  const saldo = Number(matriculaPago.saldo_pendiente) || 0;
+  const monto = Number(document.getElementById('pago-monto').value);
+  const metodo = document.getElementById('pago-metodo').value;
+  const referencia = document.getElementById('pago-referencia').value.trim();
+
+  // Validaciones en el navegador (el backend vuelve a validar)
+  if (!monto || monto <= 0) {
+    setTexto('pago-error', 'Escribe un monto mayor a 0.');
+    return;
+  }
+  if (monto > saldo) {
+    setTexto('pago-error', 'El monto no puede superar el saldo pendiente (' + formatoPesos.format(saldo) + ').');
+    return;
+  }
+  if (!metodo) {
+    setTexto('pago-error', 'Selecciona el método de pago.');
+    return;
+  }
+
+  const cuerpo = { matricula_id: matriculaPago.id, monto: monto, metodo_pago: metodo };
+  if (referencia) cuerpo.referencia_transaccion = referencia;
+
+  const btnGuardar = document.getElementById('btn-guardar-pago');
+  btnGuardar.disabled = true;
+  setTexto('pago-error', '');
+
+  try {
+    const res = await apiFetch('/admin/pagos', { method: 'POST', body: cuerpo });
+
+    if (res && res.ok) {
+      const estudiante = matriculaPago.estudiante;
+      cerrarModalPago();
+      await cargarMatriculas();
+      pintarStats();
+      pintarTabla();
+      mostrarAlerta('exito', 'Pago de ' + formatoPesos.format(monto) + ' registrado para ' + estudiante + '.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setTexto('pago-error', (res && res.datos && res.datos.mensaje) || 'No se pudo registrar el pago.');
+      btnGuardar.disabled = false;
+    }
+  } catch (err) {
+    console.error(err);
+    setTexto('pago-error', 'No se pudo conectar con el servidor.');
+    btnGuardar.disabled = false;
+  }
+}
+
+// ── 10C. NUEVA MATRÍCULA (modal) ────────────────────────────
+function abrirModalNueva() {
+  const selEst = document.getElementById('nueva-estudiante');
+  const selSal = document.getElementById('nueva-salon');
+  selEst.innerHTML = '';
+  selSal.innerHTML = '';
+
+  const opEst = crear('option', '', 'Selecciona...');
+  opEst.value = '';
+  selEst.appendChild(opEst);
+  estudiantes.filter(function (e) { return e.activo; }).forEach(function (e) {
+    const op = crear('option', '', e.nombre_completo + ' (' + e.codigo_estudiante + ')');
+    op.value = e.id;   // Estudiantes.id
+    selEst.appendChild(op);
+  });
+
+  const opSal = crear('option', '', 'Selecciona...');
+  opSal.value = '';
+  selSal.appendChild(opSal);
+  salones.filter(function (s) { return s.estado === 'activo'; }).forEach(function (s) {
+    const op = crear('option', '', s.nombre + ' \u00B7 ' + s.nivel + ' \u00B7 ' + s.anno);
+    op.value = s.id;
+    selSal.appendChild(op);
+  });
+
+  setTexto('nueva-error', '');
+  document.getElementById('btn-guardar-nueva').disabled = false;
+  document.getElementById('modal-nueva').classList.add('abierto');
+  selEst.focus();
+}
+
+function cerrarModalNueva() {
+  document.getElementById('modal-nueva').classList.remove('abierto');
+}
+
+async function enviarNueva(e) {
+  e.preventDefault();
+  const estudianteId = Number(document.getElementById('nueva-estudiante').value);
+  const salonId = Number(document.getElementById('nueva-salon').value);
+
+  if (!estudianteId) { setTexto('nueva-error', 'Selecciona el estudiante.'); return; }
+  if (!salonId) { setTexto('nueva-error', 'Selecciona el salón.'); return; }
+
+  const btn = document.getElementById('btn-guardar-nueva');
+  btn.disabled = true;
+  setTexto('nueva-error', '');
+
+  try {
+    const res = await apiFetch('/admin/matriculas', {
+      method: 'POST',
+      body: { estudiante_id: estudianteId, salon_id: salonId }
+    });
+
+    if (res && res.ok) {
+      cerrarModalNueva();
+      await cargarMatriculas();
+      pintarStats();
+      pintarTabla();
+      mostrarAlerta('exito', (res.datos && res.datos.mensaje) || 'Matrícula creada.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setTexto('nueva-error', (res && res.datos && res.datos.mensaje) || 'No se pudo crear la matrícula.');
+      btn.disabled = false;
+    }
+  } catch (err) {
+    console.error(err);
+    setTexto('nueva-error', 'No se pudo conectar con el servidor.');
+    btn.disabled = false;
+  }
+}
+
+// ── 11. EVENTOS ─────────────────────────────────────────────
+document.getElementById('btn-abrir-modal').addEventListener('click', abrirModalNueva);
+document.getElementById('form-nueva').addEventListener('submit', enviarNueva);
+document.getElementById('btn-cerrar-nueva').addEventListener('click', cerrarModalNueva);
+document.getElementById('btn-cancelar-nueva').addEventListener('click', cerrarModalNueva);
+document.getElementById('modal-nueva').addEventListener('click', function (e) {
+  if (e.target === this) cerrarModalNueva();
+});
+document.getElementById('form-pago').addEventListener('submit', enviarPago);
+document.getElementById('btn-cerrar-pago').addEventListener('click', cerrarModalPago);
+document.getElementById('btn-cancelar-pago').addEventListener('click', cerrarModalPago);
+document.getElementById('modal-pago').addEventListener('click', function (e) {
+  if (e.target === this) cerrarModalPago();   // clic en el fondo oscuro
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { cerrarModalPago(); cerrarModalNueva(); }
 });
 
-// ── 12. NOTIFICACIÓN (campanita) ────────────────────────────
-const btnNotif = document.getElementById('btn-notif');
-if (btnNotif) {
-  btnNotif.addEventListener('click', function () {
-    mostrarToast('No tienes notificaciones nuevas');
-  });
+function alCambiarFiltro() {
+  pagina = 1;
+  pintarTabla();
 }
 
-// ── 13. TOAST ────────────────────────────────────────────────
-function mostrarToast(mensaje, esError) {
-  const existente = document.querySelector('.toast-notif');
-  if (existente) existente.remove();
+document.getElementById('input-busqueda').addEventListener('input', alCambiarFiltro);
+['filtro-estado', 'filtro-nivel', 'filtro-salon'].forEach(function (id) {
+  document.getElementById(id).addEventListener('change', alCambiarFiltro);
+});
 
-  const toast = document.createElement('div');
-  toast.className = 'toast-notif';
-  toast.textContent = mensaje;
-  toast.style.cssText = [
-    'position:fixed', 'bottom:28px', 'right:28px', 'z-index:999',
-    'background:' + (esError ? 'var(--rojo)' : 'var(--morado)'),
-    'color:#fff', 'padding:12px 22px', 'border-radius:50px',
-    'font-size:0.85rem', 'font-weight:600',
-    'box-shadow:0 4px 18px rgba(0,0,0,0.18)',
-    'animation:slideInToast 0.3s ease',
-    'pointer-events:none'
-  ].join(';');
+document.getElementById('btn-reset-filtros').addEventListener('click', function () {
+  document.getElementById('input-busqueda').value = '';
+  document.getElementById('filtro-estado').value = 'todos';
+  document.getElementById('filtro-nivel').value = 'todos';
+  document.getElementById('filtro-salon').value = 'todos';
+  alCambiarFiltro();
+});
 
-  if (!document.getElementById('style-toast')) {
-    const s = document.createElement('style');
-    s.id = 'style-toast';
-    s.textContent = '@keyframes slideInToast{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}';
-    document.head.appendChild(s);
+// Acciones rápidas: cada página abrirá su formulario al llegar con ?nuevo=1
+document.getElementById('sb-nuevo-alumno').addEventListener('click', function () {
+  window.location.href = 'alumnos.html?nuevo=1';
+});
+document.getElementById('sb-nuevo-docente').addEventListener('click', function () {
+  window.location.href = 'docentes.html?nuevo=1';
+});
+document.getElementById('sb-nuevo-salon').addEventListener('click', function () {
+  window.location.href = 'salones.html?nuevo=1';
+});
+
+// ── 12. ARRANCAR ────────────────────────────────────────────
+async function iniciar() {
+  pintarFecha();
+  try {
+    await Promise.all([cargarMatriculas(), cargarSalones(), cargarEstudiantes()]);
+  } catch (err) {
+    console.error('Error al cargar los datos:', err);
+    mostrarAlerta('error', 'No se pudo conectar con el servidor.');
   }
-
-  document.body.appendChild(toast);
-  setTimeout(function () {
-    toast.style.opacity    = '0';
-    toast.style.transition = 'opacity 0.3s';
-    setTimeout(function () { toast.remove(); }, 320);
-  }, 2500);
+  llenarFiltros();
+  pintarStats();
+  pintarTabla();
 }
 
-// ── 14. RENDER INICIAL ───────────────────────────────────────
-renderTabla();
+if (sesionValida) iniciar();

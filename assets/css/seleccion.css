@@ -36,16 +36,18 @@
 
 .hero-admisiones h1 {
   font-family: var(--font-titulo);
-  font-size: 2.1rem;
-  margin-bottom: 16px;
-  line-height: 1.3;
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  margin-bottom: 18px;
+  line-height: 1.2;
 }
 
 .hero-admisiones p {
-  font-size: 1.05rem;
-  opacity: 0.92;
-  margin-bottom: 28px;
-  line-height: 1.6;
+  font-size: 1.08rem;
+  font-weight: 300;
+  opacity: 0.94;
+  margin: 0 auto 30px;
+  line-height: 1.7;
+  max-width: 560px;
 }
 
 .hero-admisiones .hero-botones {
@@ -66,16 +68,18 @@
 
 .pasos h2 {
   font-family: var(--font-titulo);
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
   color: var(--morado);
   margin-bottom: 12px;
 }
 
 .subtitulo-pasos {
   font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.6;
   color: var(--gris-texto);
   margin-bottom: 48px;
-  max-width: 640px;
+  max-width: 560px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -113,7 +117,7 @@
   margin-bottom: 16px;
 }
 
-.paso-item h3 { font-size: 1rem; font-weight: bold; margin-bottom: 8px; color: var(--negro); }
+.paso-item h3 { font-size: 1rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; color: var(--negro); }
 .paso-item p { font-size: 0.9rem; color: var(--gris-texto); line-height: 1.5; }
 
 /* ============================================================
@@ -127,7 +131,7 @@
 
 .selector-perfil h2 {
   font-family: var(--font-titulo);
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
   color: var(--morado);
   margin-bottom: 12px;
 }
@@ -154,8 +158,8 @@
 
 .card-perfil:hover { box-shadow: var(--sombra); transform: translateY(-4px); }
 
-.card-perfil .icono { font-size: 2.4rem; margin-bottom: 14px; display: block; }
-.card-perfil h3 { font-size: 1rem; font-weight: bold; margin-bottom: 8px; }
+.card-perfil .icono { font-size: 2.2rem; margin-bottom: 16px; display: block; }
+.card-perfil h3 { font-size: 1rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
 .card-perfil p { font-size: 0.88rem; color: var(--gris-texto); line-height: 1.5; }
 
 .card-perfil.seleccionado {
@@ -206,7 +210,7 @@
 
 .requisitos h2 {
   font-family: var(--font-titulo);
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
   color: var(--morado);
   margin-bottom: 32px;
 }
@@ -249,8 +253,8 @@
   text-align: center;
 }
 
-.cta-final h2 { font-family: var(--font-titulo); font-size: 1.6rem; margin-bottom: 12px; }
-.cta-final p { font-size: 1rem; opacity: 0.92; margin-bottom: 24px; max-width: 600px; margin-left: auto; margin-right: auto; }
+.cta-final h2 { font-family: var(--font-titulo); font-size: clamp(1.4rem, 3vw, 1.8rem); margin-bottom: 12px; }
+.cta-final p { font-size: 1rem; font-weight: 300; line-height: 1.6; opacity: 0.92; margin-bottom: 24px; max-width: 600px; margin-left: auto; margin-right: auto; }
 .cta-final .btn-secundario { display: inline-block; }
 
 /* ============================================================
@@ -262,7 +266,6 @@
 
 @media (max-width: 768px) {
   .grid-perfiles { grid-template-columns: 1fr; }
-  .hero-admisiones h1 { font-size: 1.6rem; }
 }
 
 @media (max-width: 480px) {

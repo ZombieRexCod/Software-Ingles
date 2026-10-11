@@ -4,509 +4,600 @@
    Ubicación: assets/js/alumnos_admin.js
 ============================================================ */
 
-// ── 1. SESIÓN ───────────────────────────────────────────────
+const API = window.location.origin + '/api';
+
+// ── 1. VERIFICAR SESIÓN ─────────────────────────────────────
+const token = sessionStorage.getItem('token');
+const rol   = sessionStorage.getItem('rol');
+const sesionValida = !!token && rol === 'admin';
+
+if (!sesionValida) {
+  window.location.href = '../auth/login.html';
+}
+
+// ── 2. NOMBRE Y AVATAR ──────────────────────────────────────
 const nombre    = sessionStorage.getItem('nombre') || 'Administrador';
 const navNombre = document.getElementById('nav-nombre');
 const navAvatar = document.getElementById('nav-avatar');
 if (navNombre) navNombre.textContent = nombre;
 if (navAvatar) navAvatar.textContent = nombre.charAt(0).toUpperCase();
 
+// ── 3. CERRAR SESIÓN ────────────────────────────────────────
 document.querySelector('.btn-cerrar').addEventListener('click', function (e) {
   e.preventDefault();
   sessionStorage.clear();
   window.location.href = '../auth/login.html';
 });
 
-// ── 2. DATOS INICIALES ──────────────────────────────────────
-const COLORES_AVATAR = [
-  'linear-gradient(135deg,#4B0082,#6A0DAD)',
-  'linear-gradient(135deg,#C0392B,#E74C3C)',
-  'linear-gradient(135deg,#2980B9,#5dade2)',
-  'linear-gradient(135deg,#27AE60,#58d68d)',
-  'linear-gradient(135deg,#F39C12,#f8c471)',
-  'linear-gradient(135deg,#8e44ad,#9b59b6)',
-];
+// ── 4. HELPER PARA LA API (GET, POST, PUT) ──────────────────
+// Devuelve { ok, datos } o null si el token venció.
+async function apiFetch(ruta, opciones) {
+  const config = opciones || {};
+  const headers = { 'Authorization': 'Bearer ' + token };
+  if (config.body) headers['Content-Type'] = 'application/json';
 
-let contadorMatricula = 54;
+  const respuesta = await fetch(API + ruta, {
+    method: config.method || 'GET',
+    headers: headers,
+    body: config.body ? JSON.stringify(config.body) : undefined
+  });
 
-let alumnos = [
-  { id:1,  nombre:'Laura Gómez',      correo:'laura.gomez@mail.com',      telefono:'3001234501', nivel:'A1', salon:'Canadá',        ingreso:'2026-01-15', estado:'activo'   },
-  { id:2,  nombre:'Carlos Ríos',      correo:'carlos.rios@mail.com',       telefono:'3001234502', nivel:'A1', salon:'Canadá',        ingreso:'2026-01-15', estado:'activo'   },
-  { id:3,  nombre:'María Paz',        correo:'maria.paz@mail.com',         telefono:'3001234503', nivel:'B2', salon:'Nueva Zelanda', ingreso:'2026-01-20', estado:'activo'   },
-  { id:4,  nombre:'Andrés López',     correo:'andres.lopez@mail.com',      telefono:'3001234504', nivel:'A1', salon:'Canadá',        ingreso:'2026-02-01', estado:'activo'   },
-  { id:5,  nombre:'Sofía Torres',     correo:'sofia.torres@mail.com',      telefono:'3001234505', nivel:'C1', salon:'Miami',         ingreso:'2026-02-01', estado:'pendiente'},
-  { id:6,  nombre:'Juan Martínez',    correo:'juan.martinez@mail.com',     telefono:'3001234506', nivel:'B1', salon:'Londres',       ingreso:'2026-02-10', estado:'pendiente'},
-  { id:7,  nombre:'Valentina Cruz',   correo:'valentina.cruz@mail.com',    telefono:'3001234507', nivel:'C1', salon:'Miami',         ingreso:'2026-02-10', estado:'activo'   },
-  { id:8,  nombre:'Felipe Herrera',   correo:'felipe.herrera@mail.com',    telefono:'3001234508', nivel:'A2', salon:'Canadá',        ingreso:'2026-02-15', estado:'activo'   },
-  { id:9,  nombre:'Camila Rojas',     correo:'camila.rojas@mail.com',      telefono:'3001234509', nivel:'B2', salon:'Nueva Zelanda', ingreso:'2026-03-01', estado:'activo'   },
-  { id:10, nombre:'Diego Vargas',     correo:'diego.vargas@mail.com',      telefono:'3001234510', nivel:'A1', salon:'Canadá',        ingreso:'2026-03-01', estado:'inactivo' },
-  { id:11, nombre:'Lucía Mora',       correo:'lucia.mora@mail.com',        telefono:'3001234511', nivel:'B1', salon:'Londres',       ingreso:'2026-03-05', estado:'activo'   },
-  { id:12, nombre:'Sebastián Ruiz',   correo:'sebastian.ruiz@mail.com',    telefono:'3001234512', nivel:'C2', salon:'Miami',         ingreso:'2026-03-10', estado:'activo'   },
-  { id:13, nombre:'Isabella Peña',    correo:'isabella.pena@mail.com',     telefono:'3001234513', nivel:'A2', salon:'Canadá',        ingreso:'2026-03-15', estado:'activo'   },
-  { id:14, nombre:'Miguel Castro',    correo:'miguel.castro@mail.com',     telefono:'3001234514', nivel:'B2', salon:'Nueva Zelanda', ingreso:'2026-03-20', estado:'inactivo' },
-  { id:15, nombre:'Natalia Soto',     correo:'natalia.soto@mail.com',      telefono:'3001234515', nivel:'A1', salon:'Canadá',        ingreso:'2026-04-01', estado:'activo'   },
-];
+  if (respuesta.status === 401) {
+    sessionStorage.clear();
+    window.location.href = '../auth/login.html';
+    return null;
+  }
 
-// Generar matrícula a partir del id
-function generarMatricula(id) {
-  return 'AL-2026-' + String(id).padStart(5, '0');
+  let datos = null;
+  try { datos = await respuesta.json(); } catch (err) { /* sin cuerpo JSON */ }
+  return { ok: respuesta.ok, datos: datos };
 }
 
-// Asignar color de avatar según inicial
-function colorAvatar(nombre) {
-  const idx = nombre.charCodeAt(0) % COLORES_AVATAR.length;
-  return COLORES_AVATAR[idx];
+// ── 5. UTILIDADES ───────────────────────────────────────────
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+function crear(tag, clase, texto) {
+  const el = document.createElement(tag);
+  if (clase) el.className = clase;
+  if (texto !== undefined) el.textContent = texto;
+  return el;
 }
 
-// ── 3. ESTADO DE FILTROS / BÚSQUEDA / ORDEN ─────────────────
-let filtroNivel  = 'todos';
-let filtroEstado = 'todos';
-let busqueda     = '';
-let sortCol      = null;
-let sortDir      = 1; // 1 asc, -1 desc
-let modoEdicion  = null; // id del alumno en edición o null
-
-// ── 4. FILTRAR Y ORDENAR ─────────────────────────────────────
-function filtrarAlumnos() {
-  return alumnos
-    .filter(function (a) {
-      const pasaNivel  = filtroNivel  === 'todos' || a.nivel  === filtroNivel;
-      const pasaEstado = filtroEstado === 'todos' || a.estado === filtroEstado;
-      const q = busqueda.toLowerCase();
-      const pasaBusqueda = !q ||
-        a.nombre.toLowerCase().includes(q) ||
-        a.correo.toLowerCase().includes(q) ||
-        generarMatricula(a.id).toLowerCase().includes(q);
-      return pasaNivel && pasaEstado && pasaBusqueda;
-    })
-    .sort(function (a, b) {
-      if (!sortCol) return 0;
-      let va = a[sortCol], vb = b[sortCol];
-      if (typeof va === 'string') va = va.toLowerCase();
-      if (typeof vb === 'string') vb = vb.toLowerCase();
-      return va < vb ? -sortDir : va > vb ? sortDir : 0;
-    });
+function porId(id) {
+  return document.getElementById(id);
 }
 
-// ── 5. ACTUALIZAR STATS MINI ─────────────────────────────────
-function actualizarStats() {
-  const activos   = alumnos.filter(a => a.estado === 'activo').length;
-  const inactivos = alumnos.filter(a => a.estado === 'inactivo').length;
-  const pendientes= alumnos.filter(a => a.estado === 'pendiente').length;
-  document.getElementById('sm-activos').textContent   = activos;
-  document.getElementById('sm-inactivos').textContent = inactivos;
-  document.getElementById('sm-pendientes').textContent= pendientes;
-  document.getElementById('sm-total').textContent     = alumnos.length;
-  document.getElementById('texto-conteo').textContent =
-    alumnos.length + ' alumnos registrados en total';
+function setTexto(id, texto) {
+  const el = porId(id);
+  if (el) el.textContent = texto;
 }
 
-// ── 6. RENDER TABLA ──────────────────────────────────────────
-function renderTabla() {
-  const tbody   = document.getElementById('tbody-alumnos');
-  const sinRes  = document.getElementById('sin-resultados');
-  const badge   = document.getElementById('badge-resultados');
-  const lista   = filtrarAlumnos();
+function inicial(texto) {
+  return String(texto || '?').trim().charAt(0).toUpperCase();
+}
 
-  badge.textContent = lista.length + ' resultado' + (lista.length !== 1 ? 's' : '');
+function plural(n, singular, pluralTexto) {
+  return n + ' ' + (n === 1 ? singular : pluralTexto);
+}
+
+// "2026-10-09T11:23:18.393Z" -> "9 Oct 2026" (en UTC para que no se corra un día)
+function fmtFecha(valor) {
+  if (!valor) return '—';
+  const d = new Date(valor);
+  return d.getUTCDate() + ' ' + MESES[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+}
+
+// Texto gris para lo que la base de datos aún no entrega
+function proximamente() {
+  const s = crear('span', '', 'Próximamente');
+  s.style.color = 'var(--gris-texto)';
+  s.style.fontSize = '0.78rem';
+  s.style.fontStyle = 'italic';
+  return s;
+}
+
+// Este CSS no tiene clases de alerta, así que los estilos se ponen aquí
+function mostrarAlerta(tipo, texto) {
+  const alerta = porId('alerta');
+  alerta.textContent = texto;
+  alerta.style.padding = '12px 16px';
+  alerta.style.borderRadius = '10px';
+  alerta.style.marginBottom = '16px';
+  alerta.style.fontSize = '0.85rem';
+  alerta.style.fontWeight = '600';
+  if (tipo === 'exito') {
+    alerta.style.background = 'rgba(39,174,96,0.12)';
+    alerta.style.color = 'var(--verde)';
+    alerta.style.border = '1px solid rgba(39,174,96,0.3)';
+  } else {
+    alerta.style.background = 'rgba(192,57,43,0.1)';
+    alerta.style.color = 'var(--rojo)';
+    alerta.style.border = '1px solid rgba(192,57,43,0.3)';
+  }
+  alerta.classList.remove('oculto');
+}
+
+function ocultarAlerta() {
+  porId('alerta').classList.add('oculto');
+}
+
+// ── 6. ESTADO DE LA PÁGINA ──────────────────────────────────
+let alumnos = [];                 // usuarios con rol "estudiante"
+let filtroEstado = 'todos';       // todos | activo | inactivo
+let orden = { col: 'nombre', dir: 'asc' };
+let vista = 'tabla';              // tabla | cards
+let alumnoADesactivar = null;
+let alumnoEditando = null;        // null = agregar; objeto = editar
+let codigos = {};                 // usuario_id -> codigo_estudiante
+
+function estadoDe(a) {
+  return a.activo ? 'activo' : 'inactivo';
+}
+
+// ── 7. CARGA DE DATOS ───────────────────────────────────────
+async function cargarAlumnos() {
+  const res = await apiFetch('/admin/usuarios');
+  if (res && res.ok && res.datos && Array.isArray(res.datos.usuarios)) {
+    alumnos = res.datos.usuarios.filter(function (u) { return u.rol === 'estudiante'; });
+    await cargarCodigos();
+    return true;
+  }
+  mostrarAlerta('error', (res && res.datos && res.datos.mensaje) || 'No se pudieron cargar los alumnos.');
+  return false;
+}
+
+// El código de estudiante viene de GET /admin/estudiantes (se cruza por usuario_id)
+async function cargarCodigos() {
+  try {
+    const res = await apiFetch('/admin/estudiantes');
+    codigos = {};
+    if (res && res.ok && res.datos && Array.isArray(res.datos.estudiantes)) {
+      res.datos.estudiantes.forEach(function (e) { codigos[e.usuario_id] = e.codigo_estudiante; });
+    }
+  } catch (err) {
+    console.error('Error al cargar los códigos de estudiante:', err);
+  }
+}
+
+// ── 8. FILTRAR Y ORDENAR ────────────────────────────────────
+function filtrar() {
+  const texto = porId('input-busqueda').value.trim().toLowerCase();
+
+  const lista = alumnos.filter(function (a) {
+    if (filtroEstado !== 'todos' && estadoDe(a) !== filtroEstado) return false;
+    if (texto) {
+      const paja = (String(a.nombre_completo) + ' ' + String(a.correo) + ' ' + String(codigos[a.id] || '')).toLowerCase();
+      if (paja.indexOf(texto) === -1) return false;
+    }
+    return true;
+  });
+
+  const factor = orden.dir === 'asc' ? 1 : -1;
+  lista.sort(function (a, b) {
+    if (orden.col === 'ingreso') {
+      return (new Date(a.creado_en) - new Date(b.creado_en)) * factor;
+    }
+    return String(a.nombre_completo).localeCompare(String(b.nombre_completo), 'es') * factor;
+  });
+
+  return lista;
+}
+
+// ── 9. PINTAR STATS ─────────────────────────────────────────
+function pintarStats() {
+  const activos = alumnos.filter(function (a) { return a.activo; }).length;
+  setTexto('sm-activos', activos);
+  setTexto('sm-inactivos', alumnos.length - activos);
+  setTexto('sm-total', alumnos.length);
+  setTexto('texto-conteo', plural(alumnos.length, 'alumno registrado', 'alumnos registrados') +
+    ' \u00B7 ' + plural(activos, 'activo', 'activos'));
+}
+
+// ── 10. TABLA Y TARJETAS ────────────────────────────────────
+function crearBadgeEstado(a) {
+  const estado = estadoDe(a);
+  return crear('span', 'badge-estado ' + estado, estado === 'activo' ? 'Activo' : 'Inactivo');
+}
+
+function crearBotonEditar(a) {
+  const btn = crear('button', 'btn-editar-fila', 'Editar');
+  btn.addEventListener('click', function () { abrirModalAlumno(a); });
+  return btn;
+}
+
+// Botón de acción: Desactivar (pide confirmar) o Activar (directo)
+function crearBotonAccion(a) {
+  if (a.activo) {
+    const btn = crear('button', 'btn-eliminar-fila', 'Desactivar');
+    btn.addEventListener('click', function () { pedirDesactivar(a); });
+    return btn;
+  }
+  const btn = crear('button', 'btn-editar-fila', 'Activar');
+  btn.addEventListener('click', function () { cambiarEstado(a, true, btn); });
+  return btn;
+}
+
+function crearFila(a) {
+  const tr = crear('tr');
+
+  const tdAlumno = crear('td');
+  const info = crear('div', 'alumno-info');
+  info.appendChild(crear('div', 'avatar-alumno', inicial(a.nombre_completo)));
+  const textos = crear('div');
+  textos.appendChild(crear('div', 'alumno-nombre', a.nombre_completo));
+  textos.appendChild(crear('div', 'alumno-correo', a.correo));
+  info.appendChild(textos);
+  tdAlumno.appendChild(info);
+  tr.appendChild(tdAlumno);
+
+  // Nivel y salón: ninguna API admin los trae por alumno todavía (la matrícula sí viene de /admin/estudiantes)
+  const tdMat = crear('td', 'td-matricula', codigos[a.id] || '—');
+  tr.appendChild(tdMat);
+
+  const tdNivel = crear('td');
+  tdNivel.appendChild(proximamente());
+  tr.appendChild(tdNivel);
+
+  const tdSalon = crear('td');
+  tdSalon.appendChild(proximamente());
+  tr.appendChild(tdSalon);
+
+  tr.appendChild(crear('td', '', a.telefono || '—'));
+  tr.appendChild(crear('td', '', fmtFecha(a.creado_en)));
+
+  const tdEstado = crear('td');
+  tdEstado.appendChild(crearBadgeEstado(a));
+  tr.appendChild(tdEstado);
+
+  const tdAcc = crear('td');
+  const btns = crear('div', 'btns-accion');
+  btns.appendChild(crearBotonEditar(a));
+  btns.appendChild(crearBotonAccion(a));
+  tdAcc.appendChild(btns);
+  tr.appendChild(tdAcc);
+
+  return tr;
+}
+
+function crearLineaCard(etiqueta, valor) {
+  const linea = crear('span');
+  linea.appendChild(document.createTextNode(etiqueta + ': '));
+  linea.appendChild(crear('strong', '', valor));
+  return linea;
+}
+
+function crearCard(a) {
+  const card = crear('div', 'alumno-card');
+
+  const cabecera = crear('div', 'card-avatar-wrap');
+  cabecera.appendChild(crear('div', 'card-avatar', inicial(a.nombre_completo)));
+  const textos = crear('div');
+  textos.appendChild(crear('div', 'card-nombre', a.nombre_completo));
+  textos.appendChild(crear('div', 'card-correo', a.correo));
+  cabecera.appendChild(textos);
+  card.appendChild(cabecera);
+
+  const datos = crear('div', 'card-data');
+  datos.appendChild(crearLineaCard('Matrícula', codigos[a.id] || '—'));
+  datos.appendChild(crearLineaCard('Teléfono', a.telefono || '—'));
+  datos.appendChild(crearLineaCard('Ingreso', fmtFecha(a.creado_en)));
+  card.appendChild(datos);
+
+  const pie = crear('div', 'card-footer');
+  pie.appendChild(crearBadgeEstado(a));
+  const btns = crear('div', 'card-btns');
+  btns.appendChild(crearBotonEditar(a));
+  btns.appendChild(crearBotonAccion(a));
+  pie.appendChild(btns);
+  card.appendChild(pie);
+
+  return card;
+}
+
+function pintarLista() {
+  const lista = filtrar();
+  const tbody = porId('tbody-alumnos');
+  const cards = porId('seccion-cards');
+  tbody.innerHTML = '';
+  cards.innerHTML = '';
+
+  setTexto('badge-resultados', plural(lista.length, 'resultado', 'resultados'));
+
+  // Mensaje de "sin resultados"
+  const sinRes = porId('sin-resultados');
+  const textoSin = sinRes.querySelector('p');
+  if (alumnos.length === 0) {
+    textoSin.textContent = 'Todavía no hay alumnos registrados.';
+  } else {
+    textoSin.textContent = 'No se encontraron alumnos con ese criterio.';
+  }
 
   if (lista.length === 0) {
-    tbody.innerHTML = '';
-    sinRes.classList.remove('oculto');
-    return;
-  }
-  sinRes.classList.add('oculto');
-
-  tbody.innerHTML = lista.map(function (a) {
-    const mat   = generarMatricula(a.id);
-    const color = colorAvatar(a.nombre);
-    const inicial = a.nombre.charAt(0).toUpperCase();
-    return `
-      <tr class="fila-alumno" data-id="${a.id}">
-        <td>
-          <div class="alumno-info">
-            <div class="avatar-alumno" style="background:${color}">${inicial}</div>
-            <div>
-              <div class="alumno-nombre">${a.nombre}</div>
-              <div class="alumno-correo">${a.correo}</div>
-            </div>
-          </div>
-        </td>
-        <td class="td-matricula">${mat}</td>
-        <td><span class="nivel-badge">${a.nivel}</span></td>
-        <td>${a.salon}</td>
-        <td>${a.telefono}</td>
-        <td>${formatearFecha(a.ingreso)}</td>
-        <td><span class="badge-estado ${a.estado}">${labelEstado(a.estado)}</span></td>
-        <td>
-          <div class="btns-accion">
-            <button class="btn-editar-fila" data-id="${a.id}">Editar</button>
-            <button class="btn-eliminar-fila" data-id="${a.id}">Eliminar</button>
-          </div>
-        </td>
-      </tr>`;
-  }).join('');
-
-  // Conectar eventos de fila
-  tbody.querySelectorAll('.btn-editar-fila').forEach(function (btn) {
-    btn.addEventListener('click', function () { abrirModalEditar(parseInt(this.dataset.id)); });
-  });
-  tbody.querySelectorAll('.btn-eliminar-fila').forEach(function (btn) {
-    btn.addEventListener('click', function () { abrirModalEliminar(parseInt(this.dataset.id)); });
-  });
-
-  // Animación
-  tbody.querySelectorAll('.fila-alumno').forEach(function (fila, i) {
-    fila.style.opacity   = '0';
-    fila.style.transform = 'translateY(8px)';
-    fila.style.transition = 'opacity 0.28s ease ' + (i * 0.04) + 's, transform 0.28s ease ' + (i * 0.04) + 's';
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        fila.style.opacity   = '1';
-        fila.style.transform = 'translateY(0)';
-      });
+    if (vista === 'tabla') {
+      sinRes.classList.remove('oculto');
+    } else {
+      sinRes.classList.add('oculto');
+      cards.appendChild(crear('p', '', textoSin.textContent));
+    }
+  } else {
+    sinRes.classList.add('oculto');
+    lista.forEach(function (a) {
+      tbody.appendChild(crearFila(a));
+      cards.appendChild(crearCard(a));
     });
-  });
-}
-
-// ── 7. RENDER CARDS ──────────────────────────────────────────
-function renderCards() {
-  const contenedor = document.getElementById('seccion-cards');
-  const lista = filtrarAlumnos();
-  if (lista.length === 0) {
-    contenedor.innerHTML = '<p style="color:var(--gris-texto);font-size:0.9rem;padding:20px">No se encontraron alumnos.</p>';
-    return;
   }
-  contenedor.innerHTML = lista.map(function (a) {
-    const mat   = generarMatricula(a.id);
-    const color = colorAvatar(a.nombre);
-    const inicial = a.nombre.charAt(0).toUpperCase();
-    return `
-      <div class="alumno-card" data-id="${a.id}">
-        <div class="card-avatar-wrap">
-          <div class="card-avatar" style="background:${color}">${inicial}</div>
-          <div>
-            <div class="card-nombre">${a.nombre}</div>
-            <div class="card-correo">${a.correo}</div>
-          </div>
-        </div>
-        <div class="card-data">
-          <span>&#128197; Ingreso: <strong>${formatearFecha(a.ingreso)}</strong></span>
-          <span>&#128198; Salón: <strong>${a.salon}</strong></span>
-          <span>&#128222; Tel: <strong>${a.telefono}</strong></span>
-          <span class="card-matricula">${mat}</span>
-        </div>
-        <div class="card-footer">
-          <span class="nivel-badge">${a.nivel}</span>
-          <span class="badge-estado ${a.estado}">${labelEstado(a.estado)}</span>
-        </div>
-        <div class="btns-accion card-btns">
-          <button class="btn-editar-fila" data-id="${a.id}">Editar</button>
-          <button class="btn-eliminar-fila" data-id="${a.id}">Eliminar</button>
-        </div>
-      </div>`;
-  }).join('');
 
-  contenedor.querySelectorAll('.btn-editar-fila').forEach(function (btn) {
-    btn.addEventListener('click', function () { abrirModalEditar(parseInt(this.dataset.id)); });
-  });
-  contenedor.querySelectorAll('.btn-eliminar-fila').forEach(function (btn) {
-    btn.addEventListener('click', function () { abrirModalEliminar(parseInt(this.dataset.id)); });
+  // Iconos de orden en los encabezados
+  document.querySelectorAll('.th-sort').forEach(function (th) {
+    const icono = th.querySelector('.sort-icon');
+    if (!icono) return;
+    if (th.dataset.col === orden.col) {
+      icono.textContent = orden.dir === 'asc' ? '\u2191' : '\u2193';
+    } else {
+      icono.textContent = '\u2195';
+    }
   });
 
-  // Animación
-  contenedor.querySelectorAll('.alumno-card').forEach(function (card, i) {
-    card.style.opacity   = '0';
-    card.style.transform = 'translateY(14px)';
-    card.style.transition = 'opacity 0.32s ease ' + (i * 0.05) + 's, transform 0.32s ease ' + (i * 0.05) + 's';
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        card.style.opacity   = '1';
-        card.style.transform = 'translateY(0)';
-      });
+  porId('btn-limpiar').classList.toggle('oculto', porId('input-busqueda').value === '');
+}
+
+function aplicarVista() {
+  const esTabla = vista === 'tabla';
+  porId('seccion-tabla').classList.toggle('oculto', !esTabla);
+  porId('seccion-cards').classList.toggle('oculto', esTabla);
+  porId('btn-vista-tabla').classList.toggle('activo', esTabla);
+  porId('btn-vista-cards').classList.toggle('activo', !esTabla);
+  pintarLista();
+}
+
+// ── 11. ACTIVAR / DESACTIVAR ────────────────────────────────
+function pedirDesactivar(a) {
+  alumnoADesactivar = a;
+  setTexto('nombre-a-eliminar', a.nombre_completo);
+  porId('modal-eliminar').classList.remove('oculto');
+}
+
+function cerrarModalDesactivar() {
+  porId('modal-eliminar').classList.add('oculto');
+  alumnoADesactivar = null;
+}
+
+async function cambiarEstado(a, activo, boton) {
+  if (boton) boton.disabled = true;
+
+  try {
+    const res = await apiFetch('/admin/usuarios/' + a.id + '/estado', {
+      method: 'PUT',
+      body: { activo: activo }
     });
-  });
+
+    if (res && res.ok) {
+      await cargarAlumnos();
+      pintarStats();
+      pintarLista();
+      mostrarAlerta('exito', activo
+        ? a.nombre_completo + ' fue activado.'
+        : a.nombre_completo + ' fue desactivado.');
+      return true;
+    }
+    mostrarAlerta('error', (res && res.datos && res.datos.mensaje) || 'No se pudo cambiar el estado del alumno.');
+  } catch (err) {
+    console.error(err);
+    mostrarAlerta('error', 'No se pudo conectar con el servidor.');
+  }
+
+  if (boton) boton.disabled = false;
+  return false;
 }
 
-// ── 8. RENDER GENERAL ────────────────────────────────────────
-function render() {
-  actualizarStats();
-  const esTabla = !document.getElementById('seccion-tabla').classList.contains('oculto');
-  if (esTabla) renderTabla(); else renderCards();
+// ── 12. MODAL: AGREGAR ALUMNO ───────────────────────────────
+const CAMPOS_MODAL = ['m-nombre', 'm-correo', 'm-contrasena', 'm-telefono', 'm-fecha-nac', 'm-pais', 'm-ciudad'];
+const ERRORES_MODAL = ['e-nombre', 'e-correo', 'e-contrasena', 'e-telefono', 'e-fecha-nac', 'e-general'];
+
+function limpiarErroresModal() {
+  ERRORES_MODAL.forEach(function (id) { setTexto(id, ''); });
+  CAMPOS_MODAL.forEach(function (id) { porId(id).classList.remove('invalido'); });
 }
 
-// ── 9. HELPERS ───────────────────────────────────────────────
-function formatearFecha(iso) {
-  const [y, m, d] = iso.split('-');
-  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  return d + ' ' + meses[parseInt(m) - 1] + ' ' + y;
+function abrirModalAlumno(alumno) {
+  alumnoEditando = alumno || null;
+  const editando = !!alumnoEditando;
+
+  CAMPOS_MODAL.forEach(function (id) { porId(id).value = ''; });
+  if (editando) {
+    porId('m-nombre').value = alumno.nombre_completo || '';
+    porId('m-correo').value = alumno.correo || '';
+    porId('m-telefono').value = alumno.telefono || '';
+  }
+  setTexto('modal-titulo', editando ? 'Editar Alumno' : 'Agregar Alumno');
+  setTexto('btn-guardar-modal', editando ? 'Guardar Cambios' : 'Guardar Alumno');
+  porId('m-contrasena').placeholder = editando ? 'Vacía = conservar la actual' : 'Mínimo 6 caracteres';
+  porId('m-contrasena-oblig').classList.toggle('oculto', editando);
+  porId('m-contrasena-oblig').style.display = editando ? 'none' : '';
+  porId('ayuda-edicion').classList.toggle('oculto', !editando);
+  limpiarErroresModal();
+  porId('btn-guardar-modal').classList.remove('cargando');
+  porId('modal-alumno').classList.remove('oculto');
+  porId('m-nombre').focus();
 }
-function labelEstado(e) {
-  return { activo:'Activo', inactivo:'Inactivo', pendiente:'Pendiente' }[e] || e;
+
+function cerrarModalAlumno() {
+  porId('modal-alumno').classList.add('oculto');
+  alumnoEditando = null;
 }
 
-// ── 10. BÚSQUEDA ─────────────────────────────────────────────
-const inputBusqueda = document.getElementById('input-busqueda');
-const btnLimpiar    = document.getElementById('btn-limpiar');
-const btnReset      = document.getElementById('btn-reset');
+function marcarError(idCampo, idError, mensaje) {
+  porId(idCampo).classList.add('invalido');
+  setTexto(idError, mensaje);
+}
 
-inputBusqueda.addEventListener('input', function () {
-  busqueda = this.value.trim();
-  btnLimpiar.classList.toggle('oculto', busqueda === '');
-  render();
-});
+async function guardarAlumno() {
+  limpiarErroresModal();
 
+  const nombreCompleto = porId('m-nombre').value.trim();
+  const correo = porId('m-correo').value.trim();
+  const contrasena = porId('m-contrasena').value;
+  const telefono = porId('m-telefono').value.trim();
+  const fechaNac = porId('m-fecha-nac').value;
+  const pais = porId('m-pais').value.trim();
+  const ciudad = porId('m-ciudad').value.trim();
+
+  // Validaciones en el navegador (el backend vuelve a validar)
+  let valido = true;
+  if (!nombreCompleto) {
+    marcarError('m-nombre', 'e-nombre', 'Escribe el nombre completo.');
+    valido = false;
+  }
+  if (!correo) {
+    marcarError('m-correo', 'e-correo', 'Escribe el correo.');
+    valido = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    marcarError('m-correo', 'e-correo', 'El correo no es válido.');
+    valido = false;
+  }
+  if ((!alumnoEditando && contrasena.length < 6) || (alumnoEditando && contrasena && contrasena.length < 6)) {
+    marcarError('m-contrasena', 'e-contrasena', 'Mínimo 6 caracteres.');
+    valido = false;
+  }
+  if (telefono && !/^\+?[0-9\s-]{7,15}$/.test(telefono)) {
+    marcarError('m-telefono', 'e-telefono', 'Teléfono no válido.');
+    valido = false;
+  }
+  if (fechaNac && new Date(fechaNac) > new Date()) {
+    marcarError('m-fecha-nac', 'e-fecha-nac', 'La fecha no puede ser futura.');
+    valido = false;
+  }
+  if (!valido) return;
+
+  const cuerpo = {
+    nombre_completo: nombreCompleto,
+    correo: correo
+  };
+  if (contrasena) cuerpo.contrasena = contrasena;
+  if (!alumnoEditando) cuerpo.rol = 'estudiante';
+  if (telefono) cuerpo.telefono = telefono;
+  if (fechaNac) cuerpo.fecha_nacimiento = fechaNac;
+  if (pais) cuerpo.pais = pais;
+  if (ciudad) cuerpo.ciudad = ciudad;
+
+  const btn = porId('btn-guardar-modal');
+  btn.classList.add('cargando');
+
+  try {
+    const editando = !!alumnoEditando;
+    const res = editando
+      ? await apiFetch('/admin/usuarios/' + alumnoEditando.id, { method: 'PUT', body: cuerpo })
+      : await apiFetch('/admin/usuarios', { method: 'POST', body: cuerpo });
+
+    if (res && res.ok) {
+      cerrarModalAlumno();
+      await cargarAlumnos();
+      pintarStats();
+      pintarLista();
+      mostrarAlerta('exito', 'Alumno ' + nombreCompleto + (editando ? ' actualizado correctamente.' : ' creado correctamente.'));
+    } else {
+      setTexto('e-general', (res && res.datos && res.datos.mensaje) || (editando ? 'No se pudo actualizar el alumno.' : 'No se pudo crear el alumno.'));
+      btn.classList.remove('cargando');
+    }
+  } catch (err) {
+    console.error(err);
+    setTexto('e-general', 'No se pudo conectar con el servidor.');
+    btn.classList.remove('cargando');
+  }
+}
+
+// ── 13. EVENTOS ─────────────────────────────────────────────
 function limpiarBusqueda() {
-  inputBusqueda.value = '';
-  busqueda = '';
-  btnLimpiar.classList.add('oculto');
-  render();
-}
-btnLimpiar.addEventListener('click', limpiarBusqueda);
-if (btnReset) btnReset.addEventListener('click', limpiarBusqueda);
-
-// ── 11. FILTROS SIDEBAR NIVEL ────────────────────────────────
-document.querySelectorAll('.filtro-sb').forEach(function (btn) {
-  btn.addEventListener('click', function () {
-    document.querySelectorAll('.filtro-sb').forEach(b => b.classList.remove('activo'));
-    this.classList.add('activo');
-    filtroNivel = this.dataset.nivel;
-    render();
+  porId('input-busqueda').value = '';
+  filtroEstado = 'todos';
+  document.querySelectorAll('.filtro-sb-estado').forEach(function (b) {
+    b.classList.toggle('activo', b.dataset.estado === 'todos');
   });
-});
+  pintarLista();
+}
 
-// ── 12. FILTROS SIDEBAR ESTADO ───────────────────────────────
+porId('input-busqueda').addEventListener('input', pintarLista);
+porId('btn-limpiar').addEventListener('click', limpiarBusqueda);
+porId('btn-reset').addEventListener('click', limpiarBusqueda);
+
+// Filtro lateral por estado (los demás botones están desactivados en el HTML)
 document.querySelectorAll('.filtro-sb-estado').forEach(function (btn) {
   btn.addEventListener('click', function () {
-    document.querySelectorAll('.filtro-sb-estado').forEach(b => b.classList.remove('activo'));
-    this.classList.add('activo');
-    filtroEstado = this.dataset.estado;
-    render();
+    if (btn.disabled) return;
+    filtroEstado = btn.dataset.estado;
+    document.querySelectorAll('.filtro-sb-estado').forEach(function (b) {
+      b.classList.toggle('activo', b === btn);
+    });
+    pintarLista();
   });
 });
 
-// ── 13. ORDENAMIENTO POR COLUMNA ─────────────────────────────
+// Ordenar al hacer clic en los encabezados Alumno / Ingreso
 document.querySelectorAll('.th-sort').forEach(function (th) {
   th.addEventListener('click', function () {
-    const col = this.dataset.col;
-    if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = 1; }
-    document.querySelectorAll('.sort-icon').forEach(function (ic) { ic.style.opacity = '0.35'; });
-    this.querySelector('.sort-icon').style.opacity = '1';
-    this.querySelector('.sort-icon').textContent = sortDir === 1 ? '↑' : '↓';
-    render();
-  });
-});
-
-// ── 14. CAMBIO DE VISTA ──────────────────────────────────────
-const btnVistaTabla = document.getElementById('btn-vista-tabla');
-const btnVistaCards = document.getElementById('btn-vista-cards');
-const secTabla      = document.getElementById('seccion-tabla');
-const secCards      = document.getElementById('seccion-cards');
-
-btnVistaTabla.addEventListener('click', function () {
-  btnVistaTabla.classList.add('activo');
-  btnVistaCards.classList.remove('activo');
-  secTabla.classList.remove('oculto');
-  secCards.classList.add('oculto');
-  renderTabla();
-});
-
-btnVistaCards.addEventListener('click', function () {
-  btnVistaCards.classList.add('activo');
-  btnVistaTabla.classList.remove('activo');
-  secCards.classList.remove('oculto');
-  secTabla.classList.add('oculto');
-  renderCards();
-});
-
-// ── 15. MODAL AGREGAR / EDITAR ───────────────────────────────
-const modalAlumno   = document.getElementById('modal-alumno');
-const modalTitulo   = document.getElementById('modal-titulo');
-const btnNuevo      = document.getElementById('btn-nuevo-alumno');
-const btnCerrar     = document.getElementById('btn-cerrar-modal');
-const btnCancelar   = document.getElementById('btn-cancelar-modal');
-const btnGuardar    = document.getElementById('btn-guardar-modal');
-
-function abrirModalNuevo() {
-  modoEdicion = null;
-  modalTitulo.textContent = 'Agregar Alumno';
-  btnGuardar.textContent  = 'Guardar Alumno';
-  limpiarModal();
-  document.getElementById('m-matricula').value = 'AL-2026-' + String(contadorMatricula + 1).padStart(5,'0');
-  modalAlumno.classList.remove('oculto');
-  document.body.style.overflow = 'hidden';
-  document.getElementById('m-nombre').focus();
-}
-
-function abrirModalEditar(id) {
-  const a = alumnos.find(x => x.id === id);
-  if (!a) return;
-  modoEdicion = id;
-  modalTitulo.textContent = 'Editar Alumno';
-  btnGuardar.textContent  = 'Guardar Cambios';
-  limpiarModal();
-  document.getElementById('m-nombre').value    = a.nombre;
-  document.getElementById('m-correo').value    = a.correo;
-  document.getElementById('m-telefono').value  = a.telefono;
-  document.getElementById('m-fecha-nac').value = a.ingreso;
-  document.getElementById('m-nivel').value     = a.nivel;
-  document.getElementById('m-salon').value     = a.salon;
-  document.getElementById('m-estado').value    = a.estado;
-  document.getElementById('m-matricula').value = generarMatricula(a.id);
-  modalAlumno.classList.remove('oculto');
-  document.body.style.overflow = 'hidden';
-}
-
-function cerrarModal() {
-  modalAlumno.classList.add('oculto');
-  document.body.style.overflow = '';
-}
-
-function limpiarModal() {
-  ['m-nombre','m-correo','m-telefono','m-fecha-nac','m-nivel','m-salon','m-pais','m-ciudad'].forEach(function (id) {
-    const el = document.getElementById(id);
-    if (el) { el.value = ''; el.classList.remove('invalido'); }
-  });
-  document.getElementById('m-estado').value = 'activo';
-  document.getElementById('m-matricula').value = '';
-  ['e-nombre','e-correo','e-telefono','e-fecha-nac','e-nivel','e-salon'].forEach(function (id) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = '';
-  });
-}
-
-btnNuevo.addEventListener('click', abrirModalNuevo);
-btnCerrar.addEventListener('click', cerrarModal);
-btnCancelar.addEventListener('click', cerrarModal);
-modalAlumno.addEventListener('click', function (e) { if (e.target === modalAlumno) cerrarModal(); });
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape' && !modalAlumno.classList.contains('oculto')) cerrarModal();
-});
-
-// ── 16. VALIDACIÓN Y GUARDADO ────────────────────────────────
-const regexCorreo   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const regexTelefono = /^[0-9]{7,15}$/;
-
-function setInvalido(inputId, errorId, msg) {
-  const el = document.getElementById(inputId);
-  el.classList.add('invalido');
-  document.getElementById(errorId).textContent = msg;
-}
-function setValido(inputId, errorId) {
-  document.getElementById(inputId).classList.remove('invalido');
-  document.getElementById(errorId).textContent = '';
-}
-
-btnGuardar.addEventListener('click', function () {
-  let ok = true;
-
-  const nom = document.getElementById('m-nombre').value.trim();
-  const cor = document.getElementById('m-correo').value.trim();
-  const tel = document.getElementById('m-telefono').value.trim();
-  const fec = document.getElementById('m-fecha-nac').value;
-  const niv = document.getElementById('m-nivel').value;
-  const sal = document.getElementById('m-salon').value;
-
-  if (nom.length < 3) { setInvalido('m-nombre','e-nombre','Ingresa el nombre completo.'); ok = false; } else setValido('m-nombre','e-nombre');
-  if (!regexCorreo.test(cor)) { setInvalido('m-correo','e-correo','Correo electrónico no válido.'); ok = false; } else setValido('m-correo','e-correo');
-  if (!regexTelefono.test(tel)) { setInvalido('m-telefono','e-telefono','Teléfono inválido (7–15 dígitos).'); ok = false; } else setValido('m-telefono','e-telefono');
-  if (!fec) { setInvalido('m-fecha-nac','e-fecha-nac','Selecciona una fecha.'); ok = false; } else setValido('m-fecha-nac','e-fecha-nac');
-  if (!niv) { setInvalido('m-nivel','e-nivel','Selecciona un nivel.'); ok = false; } else setValido('m-nivel','e-nivel');
-  if (!sal) { setInvalido('m-salon','e-salon','Selecciona un salón.'); ok = false; } else setValido('m-salon','e-salon');
-
-  if (!ok) return;
-
-  btnGuardar.textContent = 'Guardando...';
-  btnGuardar.classList.add('cargando');
-
-  setTimeout(function () {
-    btnGuardar.classList.remove('cargando');
-
-    const estado = document.getElementById('m-estado').value;
-
-    if (modoEdicion) {
-      // Editar existente
-      const idx = alumnos.findIndex(x => x.id === modoEdicion);
-      if (idx >= 0) {
-        alumnos[idx] = Object.assign(alumnos[idx], { nombre: nom, correo: cor, telefono: tel, ingreso: fec, nivel: niv, salon: sal, estado });
-      }
-      btnGuardar.textContent = 'Guardar Cambios';
-      mostrarToast('Alumno actualizado correctamente');
+    const col = th.dataset.col;
+    if (orden.col === col) {
+      orden.dir = orden.dir === 'asc' ? 'desc' : 'asc';
     } else {
-      // Nuevo alumno
-      contadorMatricula++;
-      const nuevoId = alumnos.length > 0 ? Math.max(...alumnos.map(a => a.id)) + 1 : 1;
-      alumnos.unshift({ id: nuevoId, nombre: nom, correo: cor, telefono: tel, ingreso: fec, nivel: niv, salon: sal, estado });
-      btnGuardar.textContent = 'Guardar Alumno';
-      mostrarToast('Alumno agregado correctamente');
+      orden = { col: col, dir: 'asc' };
     }
-
-    cerrarModal();
-    render();
-  }, 900);
+    pintarLista();
+  });
 });
 
-// ── 17. MODAL ELIMINAR ───────────────────────────────────────
-const modalEliminar   = document.getElementById('modal-eliminar');
-const nombreEliminar  = document.getElementById('nombre-a-eliminar');
-const btnCerrarElim   = document.getElementById('btn-cerrar-eliminar');
-const btnCancelarElim = document.getElementById('btn-cancelar-eliminar');
-const btnConfirmElim  = document.getElementById('btn-confirmar-eliminar');
-let idAEliminar = null;
+// Vista tabla / tarjetas
+porId('btn-vista-tabla').addEventListener('click', function () { vista = 'tabla'; aplicarVista(); });
+porId('btn-vista-cards').addEventListener('click', function () { vista = 'cards'; aplicarVista(); });
 
-function abrirModalEliminar(id) {
-  const a = alumnos.find(x => x.id === id);
-  if (!a) return;
-  idAEliminar = id;
-  nombreEliminar.textContent = a.nombre;
-  modalEliminar.classList.remove('oculto');
-  document.body.style.overflow = 'hidden';
-}
-
-function cerrarModalEliminar() {
-  modalEliminar.classList.add('oculto');
-  document.body.style.overflow = '';
-  idAEliminar = null;
-}
-
-btnCerrarElim.addEventListener('click', cerrarModalEliminar);
-btnCancelarElim.addEventListener('click', cerrarModalEliminar);
-modalEliminar.addEventListener('click', function (e) { if (e.target === modalEliminar) cerrarModalEliminar(); });
-
-btnConfirmElim.addEventListener('click', function () {
-  alumnos = alumnos.filter(a => a.id !== idAEliminar);
-  cerrarModalEliminar();
-  render();
-  mostrarToast('Alumno eliminado');
+// Modal agregar
+porId('btn-nuevo-alumno').addEventListener('click', function () { abrirModalAlumno(); });
+porId('btn-cerrar-modal').addEventListener('click', cerrarModalAlumno);
+porId('btn-cancelar-modal').addEventListener('click', cerrarModalAlumno);
+porId('btn-guardar-modal').addEventListener('click', guardarAlumno);
+porId('modal-alumno').addEventListener('click', function (e) {
+  if (e.target === this) cerrarModalAlumno();
 });
 
-// ── 18. TOAST ────────────────────────────────────────────────
-function mostrarToast(mensaje, esError) {
-  const existente = document.querySelector('.toast-notif');
-  if (existente) existente.remove();
-  if (!document.getElementById('style-toast')) {
-    const s = document.createElement('style');
-    s.id = 'style-toast';
-    s.textContent = '@keyframes slideInToast{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}';
-    document.head.appendChild(s);
+// Modal desactivar
+porId('btn-cerrar-eliminar').addEventListener('click', cerrarModalDesactivar);
+porId('btn-cancelar-eliminar').addEventListener('click', cerrarModalDesactivar);
+porId('modal-eliminar').addEventListener('click', function (e) {
+  if (e.target === this) cerrarModalDesactivar();
+});
+porId('btn-confirmar-eliminar').addEventListener('click', async function () {
+  if (!alumnoADesactivar) return;
+  const alumno = alumnoADesactivar;
+  const btn = this;
+  btn.disabled = true;
+  await cambiarEstado(alumno, false, null);
+  btn.disabled = false;
+  cerrarModalDesactivar();
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    cerrarModalAlumno();
+    cerrarModalDesactivar();
   }
-  const toast = document.createElement('div');
-  toast.className = 'toast-notif';
-  toast.textContent = mensaje;
-  toast.style.cssText = [
-    'position:fixed','bottom:28px','right:28px','z-index:999',
-    'background:' + (esError ? 'var(--rojo)' : 'var(--morado)'),
-    'color:#fff','padding:12px 22px','border-radius:50px',
-    'font-size:0.85rem','font-weight:600',
-    'box-shadow:0 4px 18px rgba(0,0,0,0.18)',
-    'animation:slideInToast 0.3s ease','pointer-events:none'
-  ].join(';');
-  document.body.appendChild(toast);
-  setTimeout(function () {
-    toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s';
-    setTimeout(function () { toast.remove(); }, 320);
-  }, 2500);
+});
+
+// ── 14. ARRANCAR ────────────────────────────────────────────
+async function iniciar() {
+  try {
+    await cargarAlumnos();
+  } catch (err) {
+    console.error('Error al cargar los alumnos:', err);
+    mostrarAlerta('error', 'No se pudo conectar con el servidor.');
+  }
+  pintarStats();
+  aplicarVista();
+
+  // Llegó desde "Nuevo Alumno" del inicio: abrir el modal y limpiar la URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('nuevo') === '1') {
+    abrirModalAlumno();
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 }
 
-// ── 19. INICIALIZAR ──────────────────────────────────────────
-render();
+if (sesionValida) iniciar();

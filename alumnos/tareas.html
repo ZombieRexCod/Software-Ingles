@@ -44,7 +44,7 @@
         <ul>
           <li class="clase-item">
             <span class="clase-dot"></span>
-            <a href="salon_virtual.html">Salón Canada</a>
+            <a href="salon_virtual.html">Cargando...</a>
           </li>
         </ul>
       </section>
@@ -65,22 +65,22 @@
       <div class="encabezado-pagina">
         <div>
           <h1>Tareas</h1>
-          <p>Nivel A1 &nbsp;&#183;&nbsp; Salón Canada</p>
+          <p id="texto-subtitulo"></p>
         </div>
         <!-- Resumen rápido -->
         <div class="resumen-tareas">
           <div class="resumen-item">
-            <span class="resumen-num" id="num-pendientes">2</span>
+            <span class="resumen-num" id="num-pendientes">0</span>
             <span class="resumen-label">Pendientes</span>
           </div>
           <div class="resumen-divider"></div>
           <div class="resumen-item">
-            <span class="resumen-num verde" id="num-entregadas">2</span>
+            <span class="resumen-num verde" id="num-entregadas">0</span>
             <span class="resumen-label">Entregadas</span>
           </div>
           <div class="resumen-divider"></div>
           <div class="resumen-item">
-            <span class="resumen-num gris" id="num-total">4</span>
+            <span class="resumen-num gris" id="num-total">0</span>
             <span class="resumen-label">Total</span>
           </div>
         </div>
@@ -93,56 +93,10 @@
             <span class="card-icono">&#128218;</span>
             <h2>Material De Apoyo</h2>
           </div>
-          <span class="badge-count">4 archivos</span>
+          <span class="badge-count" id="badge-material">Cargando...</span>
         </div>
 
-        <div class="grid-material">
-
-          <div class="material-card">
-            <div class="material-icono pdf">PDF</div>
-            <div class="material-info">
-              <p class="material-nombre">Libro A1 Ciclo 1</p>
-              <p class="material-desc">Fundamentos del inglés básico</p>
-            </div>
-            <button class="btn-descargar" data-archivo="libro_a1_ciclo1.pdf">
-              &#11015; Descargar
-            </button>
-          </div>
-
-          <div class="material-card">
-            <div class="material-icono pdf">PDF</div>
-            <div class="material-info">
-              <p class="material-nombre">Libro A1 Ciclo 2</p>
-              <p class="material-desc">Vocabulario y gramática básica</p>
-            </div>
-            <button class="btn-descargar" data-archivo="libro_a1_ciclo2.pdf">
-              &#11015; Descargar
-            </button>
-          </div>
-
-          <div class="material-card">
-            <div class="material-icono pdf">PDF</div>
-            <div class="material-info">
-              <p class="material-nombre">Libro A1 Ciclo 3</p>
-              <p class="material-desc">Conversación y expresión oral</p>
-            </div>
-            <button class="btn-descargar" data-archivo="libro_a1_ciclo3.pdf">
-              &#11015; Descargar
-            </button>
-          </div>
-
-          <div class="material-card">
-            <div class="material-icono pdf">PDF</div>
-            <div class="material-info">
-              <p class="material-nombre">Libro A1 Ciclo 4</p>
-              <p class="material-desc">Comprensión lectora y escritura</p>
-            </div>
-            <button class="btn-descargar" data-archivo="libro_a1_ciclo4.pdf">
-              &#11015; Descargar
-            </button>
-          </div>
-
-        </div>
+        <div class="grid-material" id="grid-material"></div>
       </section>
 
       <!-- ENTREGAS -->
@@ -161,67 +115,7 @@
           </div>
         </div>
 
-        <div class="lista-entregas" id="lista-entregas">
-
-          <!-- Tarea 1 -->
-          <div class="entrega-card" data-estado="entregado">
-            <div class="entrega-info">
-              <div class="entrega-icono">&#128221;</div>
-              <div class="entrega-detalle">
-                <p class="entrega-nombre">Biografía</p>
-                <p class="entrega-meta">Ciclo 1 &nbsp;&#183;&nbsp; Entregado el 20 Abril</p>
-              </div>
-            </div>
-            <div class="entrega-acciones">
-              <span class="badge badge-entregado">Entregado</span>
-            </div>
-          </div>
-
-          <!-- Tarea 2 -->
-          <div class="entrega-card" data-estado="revisado">
-            <div class="entrega-info">
-              <div class="entrega-icono">&#127897;</div>
-              <div class="entrega-detalle">
-                <p class="entrega-nombre">Presentación Oral</p>
-                <p class="entrega-meta">Ciclo 1 &nbsp;&#183;&nbsp; Revisado el 25 Abril</p>
-              </div>
-            </div>
-            <div class="entrega-acciones">
-              <span class="badge badge-revisado">Revisado</span>
-            </div>
-          </div>
-
-          <!-- Tarea 3 -->
-          <div class="entrega-card" data-estado="pendiente">
-            <div class="entrega-info">
-              <div class="entrega-icono">&#128221;</div>
-              <div class="entrega-detalle">
-                <p class="entrega-nombre">Writing Essay</p>
-                <p class="entrega-meta">Ciclo 2 &nbsp;&#183;&nbsp; Vence el 15 Mayo</p>
-              </div>
-            </div>
-            <div class="entrega-acciones">
-              <span class="badge badge-pendiente">Pendiente</span>
-              <button class="btn-entregar" data-tarea="Writing Essay">Entregar</button>
-            </div>
-          </div>
-
-          <!-- Tarea 4 -->
-          <div class="entrega-card" data-estado="pendiente">
-            <div class="entrega-info">
-              <div class="entrega-icono">&#127897;</div>
-              <div class="entrega-detalle">
-                <p class="entrega-nombre">Exposición Oral</p>
-                <p class="entrega-meta">Ciclo 2 &nbsp;&#183;&nbsp; Vence el 20 Mayo</p>
-              </div>
-            </div>
-            <div class="entrega-acciones">
-              <span class="badge badge-pendiente">Pendiente</span>
-              <button class="btn-entregar" data-tarea="Exposición Oral">Entregar</button>
-            </div>
-          </div>
-
-        </div>
+        <div class="lista-entregas" id="lista-entregas"></div>
       </section>
 
     </main>

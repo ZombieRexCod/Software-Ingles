@@ -10,6 +10,21 @@ const inputPass  = document.getElementById('contrasena');
 const inputPass2 = document.getElementById('confirmar-contrasena');
 const API_URL    = window.location.origin + '/api';
 
+// Si viene desde la inscripción (registro.html?volver=inscripcion), se pasa
+// ese dato al login para que luego regrese a continuar. Solo se aceptan
+// valores conocidos.
+const DESTINOS_VOLVER = ['inscripcion'];
+const volverParam = new URLSearchParams(window.location.search).get('volver');
+const sufijoVolver = DESTINOS_VOLVER.includes(volverParam) ? '?volver=' + volverParam : '';
+
+const enlaceLogin = document.querySelector('a[href="login.html"]');
+if (enlaceLogin) enlaceLogin.href = 'login.html' + sufijoVolver;
+
+// Función aparte para poder probar la redirección
+function redirigir(url) {
+  window.location.href = url;
+}
+
 // ── 1. MOSTRAR / OCULTAR CONTRASEÑA ────────────────────────
 document.getElementById('toggle-pass').addEventListener('click', function () {
   const es       = inputPass.type === 'password';
@@ -89,12 +104,6 @@ document.getElementById('ciudad').addEventListener('blur', function () {
     'La ciudad es obligatoria.');
 });
 
-document.getElementById('matricula').addEventListener('blur', function () {
-  validarCampo(this, 'error-matricula',
-    this.value.trim().length >= 2,
-    'El número de matrícula es obligatorio.');
-});
-
 // ── 4. VALIDACIÓN COMPLETA AL ENVIAR ───────────────────────
 form.addEventListener('submit', async function (e) {
   e.preventDefault();
@@ -108,7 +117,6 @@ form.addEventListener('submit', async function (e) {
   const fecha     = document.getElementById('fecha-nacimiento');
   const pais      = document.getElementById('pais');
   const ciudad    = document.getElementById('ciudad');
-  const matricula = document.getElementById('matricula');
 
   const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const regexTel   = /^[0-9+\s\-]{7,15}$/;
@@ -121,10 +129,9 @@ form.addEventListener('submit', async function (e) {
   const v6 = validarCampo(fecha,     'error-fecha',     fecha.value !== '',                           'La fecha de nacimiento es obligatoria.');
   const v7 = validarCampo(pais,      'error-pais',      pais.value.trim().length >= 2,                'El país es obligatorio.');
   const v8 = validarCampo(ciudad,    'error-ciudad',    ciudad.value.trim().length >= 2,              'La ciudad es obligatoria.');
-  const v9 = validarCampo(matricula, 'error-matricula', matricula.value.trim().length >= 2,           'El número de matrícula es obligatorio.');
 
   // Si algún campo falla, detener y mostrar error general
-  if (!v1 || !v2 || !v3 || !v4 || !v5 || !v6 || !v7 || !v8 || !v9) {
+  if (!v1 || !v2 || !v3 || !v4 || !v5 || !v6 || !v7 || !v8) {
     alerta.textContent = 'Por favor completa todos los campos obligatorios.';
     alerta.className   = 'alerta error visible';
     // Scroll al primer campo con error
@@ -149,10 +156,7 @@ form.addEventListener('submit', async function (e) {
         telefono: telefono.value.trim(),
         fecha_nacimiento: fecha.value,
         pais: pais.value.trim(),
-        ciudad: ciudad.value.trim(),
-        datosPerfil: {
-          codigo_estudiante: matricula.value.trim()
-        }
+        ciudad: ciudad.value.trim()
       })
     });
 
@@ -171,7 +175,7 @@ form.addEventListener('submit', async function (e) {
     alerta.className   = 'alerta exito visible';
 
     setTimeout(function () {
-      window.location.href = 'login.html';
+      redirigir('login.html' + sufijoVolver);
     }, 2000);
 
   } catch (error) {
