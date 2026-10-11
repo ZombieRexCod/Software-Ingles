@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { sql, getPool } = require('../config/db');
+const { CARPETA_MATERIAL } = require('../config/uploads');
 
 async function obtenerMisSalones(req, res) {
   try {
@@ -772,7 +773,7 @@ async function eliminarMaterial(req, res) {
 
     // 2. Borrar el archivo del disco (backend/uploads/material/)
     if (archivo) {
-      borrarArchivo(path.join(__dirname, '..', '..', 'uploads', 'material', path.basename(archivo)));
+      borrarArchivo(path.join(CARPETA_MATERIAL, path.basename(archivo)));
     }
 
     res.json({ mensaje: 'Material eliminado correctamente.' });

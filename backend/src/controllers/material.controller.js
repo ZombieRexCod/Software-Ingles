@@ -2,8 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const { sql, getPool } = require('../config/db');
 
-// Misma carpeta que usa material.middleware.js
-const CARPETA = path.join(__dirname, '..', '..', 'uploads', 'material');
+// Misma carpeta que usa material.middleware.js (se define en src/config/uploads.js)
+const CARPETA = require('../config/uploads').CARPETA_MATERIAL;
 
 async function descargarMaterial(req, res) {
   try {

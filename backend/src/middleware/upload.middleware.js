@@ -3,9 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-// Carpeta donde se guardan las entregas: backend/uploads/entregas
-const CARPETA = path.join(__dirname, '..', '..', 'uploads', 'entregas');
-fs.mkdirSync(CARPETA, { recursive: true });
+// Carpeta donde se guardan las entregas (se define en src/config/uploads.js)
+const CARPETA = require('../config/uploads').CARPETA_ENTREGAS;
 
 const EXTENSIONES = ['.pdf', '.doc', '.docx', '.ppt', '.pptx'];
 

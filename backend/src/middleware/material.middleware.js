@@ -3,9 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-// Carpeta donde se guarda el material de apoyo: backend/uploads/material
-const CARPETA = path.join(__dirname, '..', '..', 'uploads', 'material');
-fs.mkdirSync(CARPETA, { recursive: true });
+// Carpeta donde se guarda el material de apoyo (se define en src/config/uploads.js)
+const CARPETA = require('../config/uploads').CARPETA_MATERIAL;
 
 const EXTENSIONES = [
   '.pdf', '.doc', '.docx', '.ppt', '.pptx',
